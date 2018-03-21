@@ -1,70 +1,28 @@
-//------------------------------------------------------------------------------
-//! \file        vst3loader.cpp
-//! \description VST3 specific ARA implementation for the SDK minihost example
-//! \project     ARA SDK, examples
-//------------------------------------------------------------------------------
-// Copyright (c) 2012-2013, Celemony Software GmbH, All Rights Reserved.
-// 
-// License & Disclaimer:
-// 
-// This Software Development Kit (SDK) may not be distributed in parts or 
-// its entirety without prior written agreement of Celemony Software GmbH. 
-//
-// This SDK must not be used to modify, adapt, reproduce or transfer any 
-// software and/or technology used in any Celemony and/or Third-party 
-// application and/or software module (hereinafter referred as "the Software"); 
-// to modify, translate, reverse engineer, decompile, disassemble or create 
-// derivative works based on the Software (except to the extent applicable laws 
-// specifically prohibit such restriction) or to lease, assign, distribute or 
-// otherwise transfer rights to the Software.
-// Neither the name of the Celemony Software GmbH nor the names of its 
-// contributors may be used to endorse or promote products derived from this 
-// SDK without specific prior written permission.
-//
-// This SDK is provided by Celemony Software GmbH "as is" and any express or 
-// implied warranties, including, but not limited to, the implied warranties of 
-// non-infringement, merchantability and fitness for a particular purpose are
-// disclaimed.
-// In no event shall Celemony Software GmbH be liable for any direct, indirect, 
-// incidental, special, exemplary, or consequential damages (including, but not 
-// limited to, procurement of substitute goods or services; loss of use, data, 
-// or profits; or business interruption) however caused and on any theory of 
-// liability, whether in contract, strict liability, or tort (including 
-// negligence or otherwise) arising in any way out of the use of this software, 
-// even if advised of the possibility of such damage.
-// Where the liability of Celemony Software GmbH is ruled out or restricted, 
-// this will also apply for the personal liability of employees, representatives 
-// and vicarious agents.
-// The above restriction of liability will not apply if the damages suffered
-// are attributable to willful intent or gross negligence or in the case of 
-// physical injury.
-//------------------------------------------------------------------------------
-
 #include "VST3Effect.h"
 
+// This must be defined while we include
+// the VST3 SDK and undefined afterwards
 #define INIT_CLASS_IID
 
 #include "../ARA/AraDebug.h"
 #include "../ARA/ARAVST3.h"
 #include "../ARA/ARAInterface.h"
-using namespace ARA;
 
 #include "base/source/fstring.h"
-
 #include "pluginterfaces/vst/ivstcomponent.h"
 #include "pluginterfaces/vst/ivstaudioprocessor.h"
 #include "pluginterfaces/vst/ivstprocesscontext.h"
 
+// Undefine class IID init
 #undef INIT_CLASS_IID
 
+// Declare global plugin context
 namespace Steinberg
 {
 	FUnknown* gStandardPluginContext = 0;
 }
 
-using namespace Steinberg;
-using namespace Vst;
-
+// Platform specific library access management
 #if defined(_MSC_VER)
 #include <windows.h>
 #include <conio.h>
@@ -82,11 +40,17 @@ typedef bool ( *bundleEntryPtr )(CFBundleRef);
 typedef bool ( *bundleExitPtr )(void);
 #endif
 
+using namespace Steinberg;
+using namespace Vst;
+using namespace ARA;
+
+// Make sure these are null to start
 VST3Effect::VST3Effect() :
 	m_libHandle( nullptr ),
 	m_pComponent( nullptr )
 {}
 
+// Transfer ownership of the plugin resources completely
 VST3Effect::VST3Effect( VST3Effect&& other )
 {
 	m_libHandle = other.m_libHandle;
@@ -97,6 +61,7 @@ VST3Effect::VST3Effect( VST3Effect&& other )
 	other.m_strPluginName.clear();
 }
 
+// Transfer ownership of the plugin resources completely
 VST3Effect& VST3Effect::operator=( VST3Effect&& other )
 {
 	m_libHandle = other.m_libHandle;
@@ -108,23 +73,16 @@ VST3Effect& VST3Effect::operator=( VST3Effect&& other )
 	return *this;
 }
 
+// Free any resources
 VST3Effect::~VST3Effect() 
 {
 	Clear();
 }
 
-IComponent * VST3Effect::GetComponent() const
-{
-	return m_pComponent;
-}
-
-bool VST3Effect::isValid() const
-{
-	return m_libHandle && m_pComponent;
-}
-
+// Free or release whatever we've allocated
 void VST3Effect::Clear()
 {
+	// Tear down plugin component
 	if ( m_pComponent )
 	{
 		tresult result = m_pComponent->terminate();
@@ -133,6 +91,7 @@ void VST3Effect::Clear()
 		m_pComponent = nullptr;
 	}
 
+	// Free library
 	if ( m_libHandle )
 	{
 #if defined(_MSC_VER)
@@ -149,9 +108,56 @@ void VST3Effect::Clear()
 		m_libHandle = nullptr;
 	}
 
+	// Clear name
 	m_strPluginName.clear();
 }
 
+// Plugin component access
+IComponent * VST3Effect::GetComponent() const
+{
+	return m_pComponent;
+}
+
+// ARA factory access
+const ARA::ARAFactory * VST3Effect::GetARAFactory()
+{
+	const ARA::ARAFactory * result = NULL;
+
+	ARA::IPlugInEntryPoint * entry = NULL;
+	if ( (m_pComponent->queryInterface( ARA::IPlugInEntryPoint::iid, (void**) &entry ) == kResultTrue) && entry )
+	{
+		result = entry->getFactory();
+		entry->release();
+	}
+
+	return result;
+}
+
+// Access to ARA plugin extension
+const ARA::ARAPlugInExtensionInstance * VST3Effect::GetARAPlugInExtension( ARA::ARADocumentControllerRef controllerRef )
+{
+	const ARA::ARAPlugInExtensionInstance * result = NULL;
+
+	// Find the entry point interface
+	ARA::IPlugInEntryPoint * entry = NULL;
+	if ( (m_pComponent->queryInterface( ARA::IPlugInEntryPoint::iid, (void**) &entry ) == kResultTrue) && entry )
+	{
+		// Bind it to the document controller here and release
+		result = entry->bindToDocumentController( controllerRef );
+		entry->release();
+	}
+
+	return result;
+}
+
+
+// Do we have a library and component?
+bool VST3Effect::isValid() const
+{
+	return m_libHandle && m_pComponent;
+}
+
+// Construct scoped rendering context
 VST3Effect::RenderContext::RenderContext( VST3Effect * pVST3Effect, bool bStereo ) :
 	m_pComponent( nullptr )
 {
@@ -182,27 +188,33 @@ VST3Effect::RenderContext::RenderContext( VST3Effect * pVST3Effect, bool bStereo
 								result = pPlugComponent->setActive( true );
 								if ( dbgASSERT( result == kResultOk, "Unable to activate plugin component" ) )
 								{
+									// Success! Cache the comonent
 									m_pComponent = pPlugComponent;
 								}
 								else
 								{
+									// Failure - deactivate output plugin buses
 									result = pPlugComponent->activateBus( kAudio, kInput, 0, false );
 									result = pPlugComponent->activateBus( kAudio, kOutput, 0, false );
 								}
 							}
 							else
 							{
+								// Failure - deactivate input plugin buses
 								result = pPlugComponent->activateBus( kAudio, kInput, 0, false );
 							}
 						}
 					}
 				}
+
+				// Release processor component - for now
 				processor->release();
 			}
 		}
 	}
 }
 
+// Clean up rendereing context (deactivate buses)
 VST3Effect::RenderContext::~RenderContext()
 {
 	if ( m_pComponent )
@@ -217,12 +229,14 @@ VST3Effect::RenderContext::~RenderContext()
 				dbgASSERT( result == kResultOk, "Unable to deactivate output bus" );
 			}
 		}
-
+		m_pComponent = nullptr;
 	}
 }
 
+// Load the plugin binary from disk
 bool VST3Effect::LoadBinary( std::string strPluginName )
 {
+	// Return success
 	bool bLoadSuccess = false;
 
 	// load library
@@ -236,14 +250,18 @@ bool VST3Effect::LoadBinary( std::string strPluginName )
 		CFRelease( url );
 	}
 #endif
+
+	// Find factory proc function
 	GetFactoryProc entryProc = NULL;
 	bool bPluginInit = false;
 	if ( dbgASSERT( libHandle, "Unable to load plugin binary", strPluginName ) )
 	{
+		// Find init module function
 #if defined(_MSC_VER)
 		InitModuleProc initProc = (InitModuleProc)::GetProcAddress( libHandle, kInitModuleProcName );
 		if ( dbgASSERT( initProc, "Unable to get init proc" ) )
 		{
+			// If we found it, get entry proc
 			bPluginInit = initProc();
 			if ( dbgASSERT( bPluginInit, "Unable to initialize plugin binary" ) )
 			{
@@ -263,8 +281,10 @@ bool VST3Effect::LoadBinary( std::string strPluginName )
 #endif
 	}
 
+	// Call entry proc, if we can
 	if ( dbgASSERT( entryProc, "Missing entryProc for plugin", strPluginName ) )
 	{
+		// If we got the factory, get the factory info
 		IPluginFactory * pFactory = entryProc();
 		if ( dbgASSERT( pFactory, "Unable to create VST3 Plugin factory for plugin", strPluginName ) )
 		{
@@ -323,6 +343,7 @@ bool VST3Effect::LoadBinary( std::string strPluginName )
 	// Failure, uninit if necessary and release DLL
 	if ( bLoadSuccess == false )
 	{
+		// If we got a library handle, free it now
 		if ( libHandle )
 		{
 #if defined(_MSC_VER)
@@ -349,37 +370,10 @@ bool VST3Effect::LoadBinary( std::string strPluginName )
 	return bLoadSuccess;
 }
 
-
-const ARA::ARAFactory * VST3Effect::GetARAFactory()
-{
-	const ARA::ARAFactory * result = NULL;
-
-	ARA::IPlugInEntryPoint * entry = NULL;
-	if ( (m_pComponent->queryInterface( ARA::IPlugInEntryPoint::iid, (void**) &entry ) == kResultTrue) && entry )
-	{
-		result = entry->getFactory();
-		entry->release();
-	}
-
-	return result;
-}
-
-const ARA::ARAPlugInExtensionInstance * VST3Effect::GetARAPlugInExtension( ARA::ARADocumentControllerRef controllerRef )
-{
-	const ARA::ARAPlugInExtensionInstance * result = NULL;
-
-	ARA::IPlugInEntryPoint * entry = NULL;
-	if ( (m_pComponent->queryInterface( ARA::IPlugInEntryPoint::iid, (void**) &entry ) == kResultTrue) && entry )
-	{
-		result = entry->bindToDocumentController( controllerRef );
-		entry->release();
-	}
-
-	return result;
-}
-
+// Process function
 void VST3Effect::Process( int iLength, double dSampleRate, int iHostSamplePos, float ** ppData, int iChannelCount )
 {
+	// Get processor component
 	IAudioProcessor * processor = NULL;
 	tresult result = m_pComponent->queryInterface( IAudioProcessor::iid, (void**) &processor );
 	ARA_INTERNAL_ASSERT( result == kResultOk );
@@ -389,6 +383,7 @@ void VST3Effect::Process( int iLength, double dSampleRate, int iHostSamplePos, f
 	for ( int c = 0; c < iChannelCount; c++ )
 		dsp::Zero( ppData[c], iLength );
 
+	// Configure input and output buses
 	AudioBusBuffers inputs;
 	inputs.numChannels = 1;
 	inputs.silenceFlags = (uint64) (-1);
@@ -399,13 +394,13 @@ void VST3Effect::Process( int iLength, double dSampleRate, int iHostSamplePos, f
 	outputs.silenceFlags = 0;
 	outputs.channelBuffers32 = ppData;
 
-	// in order for Melodyne to render the ARA data, it must be set to playback mode (in stop, its built-in pre-listening logic is active)
-	// thus we implement some crude, minimal transport information here.
+	// Basic transport info
 	ProcessContext context;
 	context.state = ProcessContext::kPlaying;
 	context.sampleRate = dSampleRate;
 	context.projectTimeSamples = iHostSamplePos;
 
+	// Create processdata struct
 	ProcessData data;
 	data.processMode = kRealtime;
 	data.symbolicSampleSize = kSample32;
@@ -415,8 +410,11 @@ void VST3Effect::Process( int iLength, double dSampleRate, int iHostSamplePos, f
 	data.inputs = &inputs;
 	data.outputs = &outputs;
 	data.processContext = &context;
+
+	// Process audio into our buffers
 	result = processor->process( data );
 	ARA_INTERNAL_ASSERT( result == kResultOk );
 
+	// Release processor component
 	processor->release();
 }
