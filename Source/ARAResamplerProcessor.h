@@ -17,13 +17,13 @@
 
 #include "ICommand.h"
 
-class JuceSamplerEditor;
+class ARAResamplerEditor;
 class UniSampler;
 
 //==============================================================================
 /**
 */
-class JuceSamplerProcessor  : public AudioProcessor
+class ARAResamplerProcessor  : public AudioProcessor
 	, public ICommandListener
 {
 	static std::atomic_bool s_bInitStaticFX;
@@ -33,8 +33,8 @@ class JuceSamplerProcessor  : public AudioProcessor
 	std::mutex m_muLoadSample;
 public:
     //==============================================================================
-    JuceSamplerProcessor();
-	~JuceSamplerProcessor();
+    ARAResamplerProcessor();
+	~ARAResamplerProcessor();
 
 	UniSampler * GetSampler() const;
 
@@ -84,9 +84,9 @@ public:
 private:
 	MemoryBlock m_mbProgramText;
 	MemoryBlock m_mbRootPathText;
-	JuceSamplerEditor * m_pEditor;
+	ARAResamplerEditor * m_pEditor;
 	float m_fHostPosInternal;
 
     //==============================================================================
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (JuceSamplerProcessor)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ARAResamplerProcessor)
 };

@@ -11,7 +11,7 @@ It contains the basic framework code for a JUCE plugin editor.
 #pragma once
 
 #include "../JuceLibraryCode/JuceHeader.h"
-#include "PluginProcessor.h"
+#include "ARAResamplerProcessor.h"
 
 #include <map>
 #include <atomic>
@@ -24,7 +24,7 @@ It contains the basic framework code for a JUCE plugin editor.
 //==============================================================================
 /**
 */
-class JuceSamplerEditor : public AudioProcessorEditor,
+class ARAResamplerEditor : public AudioProcessorEditor,
 	private MultiTimer,
 	public ICommandListener
 {
@@ -41,8 +41,8 @@ class JuceSamplerEditor : public AudioProcessorEditor,
 public:
 	void SetNeedsRepaint( Colour newColor );
 
-	JuceSamplerEditor ( JuceSamplerProcessor& );
-	~JuceSamplerEditor();
+	ARAResamplerEditor ( ARAResamplerProcessor& );
+	~ARAResamplerEditor();
 
 	//==============================================================================
 	void paint ( Graphics& ) override;
@@ -63,11 +63,11 @@ private:
 
 	// This reference is provided as a quick way for your editor to
 	// access the processor object that created it.
-	JuceSamplerProcessor& processor;
+	ARAResamplerProcessor& processor;
 
 	// Window is resizable
 	ResizableCornerComponent m_Resizer;
 	ComponentBoundsConstrainer m_CBC;
 
-	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR ( JuceSamplerEditor )
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR ( ARAResamplerEditor )
 };

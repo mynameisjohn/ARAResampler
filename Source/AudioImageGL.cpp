@@ -1,5 +1,5 @@
 #include "AudioImageGL.h"
-#include "PluginEditor.h"
+#include "ARAResamplerEditor.h"
 
 // initialise override 
 void AudioImageGL::initialise()
@@ -70,7 +70,7 @@ void AudioImageGL::createWaveFromSample( UniSampler::Sample * pSample, int nLine
 
 	// Create geometry
 	std::vector<Vertex> vPositionData;
-	if ( m_pSampleToDraw->bStereo )
+	if ( pSample->bStereo )
 	{
 		
 		// 
@@ -82,11 +82,11 @@ void AudioImageGL::createWaveFromSample( UniSampler::Sample * pSample, int nLine
 				float x = dsp::Remap<float>( i, 0, nLines, -1, 1 );
 
 				// Sample level is Y pos, use line index to find corresponding sample index
-				int ixSample = dsp::Remap<double>( i, 0, nLines, 0, m_pSampleToDraw->size() );
-				float y = m_pSampleToDraw->at( 0, ixSample );
+				int ixSample = dsp::Remap<double>( i, 0, nLines, 0, pSample->size() );
+				float y = pSample->at( 0, ixSample );
 
 				// Change short to normalized float if necessary
-				if ( !m_pSampleToDraw->bFloat )
+				if ( !pSample->bFloat )
 					y /= SHRT2FLT;
 
 				// For stereo samples draw each channel between [-1, 0] and [0, 1]
@@ -105,11 +105,11 @@ void AudioImageGL::createWaveFromSample( UniSampler::Sample * pSample, int nLine
 			float x = dsp::Remap<float>( i, 0, nLines, -1, 1 );
 
 			// Sample level is y pos, use line index to find corresponding sample index
-			int ixSample = dsp::Remap<double>( i, 0, nLines, 0, m_pSampleToDraw->size() );
-			float y = m_pSampleToDraw->at( 0, ixSample );
+			int ixSample = dsp::Remap<double>( i, 0, nLines, 0, pSample->size() );
+			float y = pSample->at( 0, ixSample );
 
 			// Change short to normalized float if necessary
-			if ( !m_pSampleToDraw->bFloat )
+			if ( !pSample->bFloat )
 				y /= SHRT2FLT;
 
 			vPositionData.push_back( { x, 0 } );

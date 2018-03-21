@@ -8,15 +8,15 @@
   ==============================================================================
 */
 
-#include "PluginProcessor.h"
-#include "PluginEditor.h"
+#include "ARAResamplerProcessor.h"
+#include "ARAResamplerEditor.h"
 #include "../UniSampler/Source/Plugin/UniSampler.h"
 #include "ARAUtils/ARAPlugin.h"
 
-/*static*/ std::atomic_bool JuceSamplerProcessor::s_bInitStaticFX(false);
+/*static*/ std::atomic_bool ARAResamplerProcessor::s_bInitStaticFX(false);
 
 //==============================================================================
-JuceSamplerProcessor::JuceSamplerProcessor()
+ARAResamplerProcessor::ARAResamplerProcessor()
 #ifndef JucePlugin_PreferredChannelConfigurations
 	: AudioProcessor ( BusesProperties()
 #if ! JucePlugin_IsMidiEffect
@@ -45,24 +45,24 @@ JuceSamplerProcessor::JuceSamplerProcessor()
 	};
 }
 
-JuceSamplerProcessor::~JuceSamplerProcessor()
+ARAResamplerProcessor::~ARAResamplerProcessor()
 {
 	m_abARAThreadRun.store( false );
 	m_ARAThread.join();
 }
 
-UniSampler * JuceSamplerProcessor::GetSampler() const
+UniSampler * ARAResamplerProcessor::GetSampler() const
 {
 	return m_pSampler.get();
 }
 
 //==============================================================================
-const String JuceSamplerProcessor::getName() const
+const String ARAResamplerProcessor::getName() const
 {
 	return JucePlugin_Name;
 }
 
-bool JuceSamplerProcessor::acceptsMidi() const
+bool ARAResamplerProcessor::acceptsMidi() const
 {
 #if JucePlugin_WantsMidiInput
 	return true;
@@ -71,7 +71,7 @@ bool JuceSamplerProcessor::acceptsMidi() const
 #endif
 }
 
-bool JuceSamplerProcessor::producesMidi() const
+bool ARAResamplerProcessor::producesMidi() const
 {
 #if JucePlugin_ProducesMidiOutput
 	return true;
@@ -80,37 +80,37 @@ bool JuceSamplerProcessor::producesMidi() const
 #endif
 }
 
-double JuceSamplerProcessor::getTailLengthSeconds() const
+double ARAResamplerProcessor::getTailLengthSeconds() const
 {
 	return 0.0;
 }
 
-int JuceSamplerProcessor::getNumPrograms()
+int ARAResamplerProcessor::getNumPrograms()
 {
 	return 1;   // NB: some hosts don't cope very well if you tell them there are 0 programs,
 				// so this should be at least 1, even if you're not really implementing programs.
 }
 
-int JuceSamplerProcessor::getCurrentProgram()
+int ARAResamplerProcessor::getCurrentProgram()
 {
 	return 0;
 }
 
-void JuceSamplerProcessor::setCurrentProgram ( int index )
+void ARAResamplerProcessor::setCurrentProgram ( int index )
 {
 }
 
-const String JuceSamplerProcessor::getProgramName ( int index )
+const String ARAResamplerProcessor::getProgramName ( int index )
 {
 	return{};
 }
 
-void JuceSamplerProcessor::changeProgramName ( int index, const String& newName )
+void ARAResamplerProcessor::changeProgramName ( int index, const String& newName )
 {
 }
 
 //==============================================================================
-void JuceSamplerProcessor::prepareToPlay ( double sampleRate, int samplesPerBlock )
+void ARAResamplerProcessor::prepareToPlay ( double sampleRate, int samplesPerBlock )
 {
 	// Use this method as the place to do any pre-playback
 	// initialisation that you need..
@@ -145,14 +145,14 @@ void JuceSamplerProcessor::prepareToPlay ( double sampleRate, int samplesPerBloc
 	} );
 }
 
-void JuceSamplerProcessor::releaseResources()
+void ARAResamplerProcessor::releaseResources()
 {
 	// When playback stops, you can use this as an opportunity to free up any
 	// spare memory, etc.
 }
 
 #ifndef JucePlugin_PreferredChannelConfigurations
-bool JuceSamplerProcessor::isBusesLayoutSupported ( const BusesLayout& layouts ) const
+bool ARAResamplerProcessor::isBusesLayoutSupported ( const BusesLayout& layouts ) const
 {
 #if JucePlugin_IsMidiEffect
 	ignoreUnused ( layouts );
@@ -175,7 +175,7 @@ bool JuceSamplerProcessor::isBusesLayoutSupported ( const BusesLayout& layouts )
 }
 #endif
 
-void JuceSamplerProcessor::processBlock ( AudioSampleBuffer& buffer, MidiBuffer& midiMessages )
+void ARAResamplerProcessor::processBlock ( AudioSampleBuffer& buffer, MidiBuffer& midiMessages )
 {
 	const int totalNumInputChannels = getTotalNumInputChannels();
 	const int totalNumOutputChannels = getTotalNumOutputChannels();
@@ -247,27 +247,27 @@ void JuceSamplerProcessor::processBlock ( AudioSampleBuffer& buffer, MidiBuffer&
 }
 
 //==============================================================================
-bool JuceSamplerProcessor::hasEditor() const
+bool ARAResamplerProcessor::hasEditor() const
 {
 	return true; // (change this to false if you choose to not supply an editor)
 }
 
-AudioProcessorEditor* JuceSamplerProcessor::createEditor()
+AudioProcessorEditor* ARAResamplerProcessor::createEditor()
 {
-	m_pEditor = new JuceSamplerEditor( *this );
+	m_pEditor = new ARAResamplerEditor( *this );
 	return m_pEditor;
 }
 
 //==============================================================================
-void JuceSamplerProcessor::getStateInformation ( MemoryBlock& destData )
+void ARAResamplerProcessor::getStateInformation ( MemoryBlock& destData )
 {
 }
 
-void JuceSamplerProcessor::setStateInformation ( const void* data, int sizeInBytes )
+void ARAResamplerProcessor::setStateInformation ( const void* data, int sizeInBytes )
 {
 }
 
-void JuceSamplerProcessor::HandleCommand( CmdPtr pCMD )
+void ARAResamplerProcessor::HandleCommand( CmdPtr pCMD )
 {
 	switch ( pCMD->eType )
 	{
@@ -280,7 +280,7 @@ void JuceSamplerProcessor::HandleCommand( CmdPtr pCMD )
 	}
 }
 
-bool JuceSamplerProcessor::SetRootPathString( String strDefaultPathString )
+bool ARAResamplerProcessor::SetRootPathString( String strDefaultPathString )
 {
 	std::string strDefaultPathStringSTD = strDefaultPathString.toStdString();
 
@@ -290,17 +290,17 @@ bool JuceSamplerProcessor::SetRootPathString( String strDefaultPathString )
 	return true;
 }
 
-String JuceSamplerProcessor::GetCurrentFile()
+String ARAResamplerProcessor::GetCurrentFile()
 {
 	return m_mbProgramText.toString();
 }
 
-String JuceSamplerProcessor::GetRootPath()
+String ARAResamplerProcessor::GetRootPath()
 {
 	return m_mbRootPathText.toString();
 }
 
-void JuceSamplerProcessor::OnEditorDestroyed()
+void ARAResamplerProcessor::OnEditorDestroyed()
 {
 	m_pEditor = nullptr;
 }
@@ -309,5 +309,5 @@ void JuceSamplerProcessor::OnEditorDestroyed()
 // This creates new instances of the plugin..
 AudioProcessor* JUCE_CALLTYPE createPluginFilter()
 {
-	return new JuceSamplerProcessor();
+	return new ARAResamplerProcessor();
 }

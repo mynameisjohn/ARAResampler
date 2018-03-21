@@ -71,17 +71,18 @@
           <FILE id="IybIxV" name="tinyxml2.h" compile="0" resource="0" file="UniSampler/Source/tinyxml2/tinyxml2.h"/>
         </GROUP>
       </GROUP>
+      <FILE id="E32Hv4" name="ARAResamplerEditor.cpp" compile="1" resource="0"
+            file="Source/ARAResamplerEditor.cpp"/>
+      <FILE id="suUkEW" name="ARAResamplerEditor.h" compile="0" resource="0"
+            file="Source/ARAResamplerEditor.h"/>
+      <FILE id="zi4TSW" name="ARAResamplerProcessor.cpp" compile="1" resource="0"
+            file="Source/ARAResamplerProcessor.cpp"/>
+      <FILE id="anhTsz" name="ARAResamplerProcessor.h" compile="0" resource="0"
+            file="Source/ARAResamplerProcessor.h"/>
       <FILE id="tw4KLT" name="AudioImageGL.cpp" compile="1" resource="0"
             file="Source/AudioImageGL.cpp"/>
       <FILE id="V7jw1g" name="AudioImageGL.h" compile="0" resource="0" file="Source/AudioImageGL.h"/>
       <FILE id="HCAAFg" name="ICommand.h" compile="0" resource="0" file="Source/ICommand.h"/>
-      <FILE id="dPziEn" name="PluginProcessor.cpp" compile="1" resource="0"
-            file="Source/PluginProcessor.cpp"/>
-      <FILE id="keKofT" name="PluginProcessor.h" compile="0" resource="0"
-            file="Source/PluginProcessor.h"/>
-      <FILE id="une28n" name="PluginEditor.cpp" compile="1" resource="0"
-            file="Source/PluginEditor.cpp"/>
-      <FILE id="udMSqL" name="PluginEditor.h" compile="0" resource="0" file="Source/PluginEditor.h"/>
     </GROUP>
   </MAINGROUP>
   <EXPORTFORMATS>

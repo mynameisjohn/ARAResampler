@@ -8,13 +8,13 @@ It contains the basic framework code for a JUCE plugin editor.
 ==============================================================================
 */
 
-#include "PluginProcessor.h"
-#include "PluginEditor.h"
+#include "ARAResamplerProcessor.h"
+#include "ARAResamplerEditor.h"
 
 #include "../UniSampler/Source/Plugin/UniSampler.h"
 
 //==============================================================================
-JuceSamplerEditor::JuceSamplerEditor( JuceSamplerProcessor& p )
+ARAResamplerEditor::ARAResamplerEditor( ARAResamplerProcessor& p )
 	: AudioProcessorEditor( &p ), processor( p ),
 	m_Resizer( this, &m_CBC )
 	, keyboardComponent( midiState, MidiKeyboardComponent::horizontalKeyboard )
@@ -40,14 +40,14 @@ JuceSamplerEditor::JuceSamplerEditor( JuceSamplerProcessor& p )
 	startTimer( (int) ETimerID::KBD_FOCUS, 400 );
 }
 
-void JuceSamplerEditor::OnNewWave( File& f )
+void ARAResamplerEditor::OnNewWave( File& f )
 {
 	cmdSetARASample cmd;
 	cmd.strSampleName = f.getFullPathName();
 	processor.HandleCommand( CmdPtr( new cmdSetARASample( cmd ) ) );
 }
 
-void JuceSamplerEditor::HandleCommand( CmdPtr pCMD )
+void ARAResamplerEditor::HandleCommand( CmdPtr pCMD )
 {
 	switch ( pCMD->eType )
 	{
@@ -68,18 +68,18 @@ void JuceSamplerEditor::HandleCommand( CmdPtr pCMD )
 	}
 }
 
-JuceSamplerEditor::~JuceSamplerEditor()
+ARAResamplerEditor::~ARAResamplerEditor()
 {
 	processor.OnEditorDestroyed();
 }
 
-void JuceSamplerEditor::SetNeedsRepaint( Colour c )
+void ARAResamplerEditor::SetNeedsRepaint( Colour c )
 {
 	m_abNeedsRepaint = true;
 	m_EditorColor = c;
 }
 
-void JuceSamplerEditor::timerCallback(int iTimerID)
+void ARAResamplerEditor::timerCallback(int iTimerID)
 {
 	int ixKeyMax = -1;
 	switch ( (ETimerID) iTimerID )
@@ -110,7 +110,7 @@ void JuceSamplerEditor::timerCallback(int iTimerID)
 }
 
 //==============================================================================
-void JuceSamplerEditor::paint ( Graphics& g )
+void ARAResamplerEditor::paint ( Graphics& g )
 {
 	// (Our component is opaque, so we must completely fill the background with a solid colour)
 	g.fillAll( m_EditorColor );
@@ -121,7 +121,7 @@ void JuceSamplerEditor::paint ( Graphics& g )
 
 }
 
-void JuceSamplerEditor::resized()
+void ARAResamplerEditor::resized()
 {
 	// This is generally where you'll want to lay out the positions of any
 	// subcomponents in your editor..
