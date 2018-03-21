@@ -1,10 +1,21 @@
 #pragma once
 
+/***************************************************************
+ARAUtil.h
+
+This is essentially a copy of the ARAExampleUtil.h file from
+the ARA SDK modified to work with my code. Specifically we need
+valid pointers to the ARAAudioSourceHostRef and ARAContentAccessControllerHostRef
+objects so that we can access our audio sample data
+
+***************************************************************/
+
 #include "../ARA/ARAInterface.h"
 #include "../ARA/AraDebug.h"
 
-// These are stolen from the testhost ARA example
-// I'm actually using the ARAAudioSourceHostRef and ARAContentAccessControllerHostRef
+// Leave these as is for validation purposes save for the 
+// ARAAudioSourceHostRef and ARAContentAccessControllerHostRef
+//======================================================================================
 // #define kHostAudioSourceHostRef ((ARA::ARAAudioSourceHostRef) 1)
 #define kHostAudioModificationHostRef ((ARA::ARAAudioModificationHostRef) 2)
 #define kHostMusicalContextHostRef ((ARA::ARAMusicalContextHostRef) 3)
@@ -19,6 +30,7 @@
 #define kHostSignaturesContentReaderHostRef ((ARA::ARAContentReaderHostRef) 31)
 #define kARAInvalidHostRef ((ARA::ARAHostRef) 0)
 
+// This is needed in C++
 using namespace ARA;
 
 // ARAAudioAccessControllerInterface (required)
@@ -32,53 +44,61 @@ ARAAudioReaderHostRef ARA_CALL ARACreateAudioReaderForSource( ARAAudioAccessCont
 	ARA_LOG( "TestHost: createAudioReaderForSource() returns fake ref %p", accessorRef );
 	return accessorRef;
 }
+
+// Similar to the SDK example, but the input data from the host is our ARA Plugin instance
 ARABool ARA_CALL ARAReadAudioSamples( ARAAudioAccessControllerHostRef controllerHostRef, ARAAudioReaderHostRef readerHostRef,
 									  ARASamplePosition samplePosition, ARASampleCount samplesPerChannel, void * const * buffers )
 {
 	void * bufferPtr;
 
 	// ARA_VALIDATE_ARGUMENT( controllerHostRef, controllerHostRef == kAudioAccessControllerHostRef );
-	dbgASSERT( controllerHostRef, "Missing Controller Host Ref to our sample" );
-	ARAPlugin * pPlugin = (ARAPlugin *) controllerHostRef;
-	UniSampler::Sample * pSample = pPlugin->GetCurrentRootSample();
-	int iChannelCount = pSample->bStereo ? 2 : 1;
-	ARA_VALIDATE_ARGUMENT( readerHostRef, (readerHostRef == kAudioAccessor32BitHostRef) || (readerHostRef == kAudioAccessor64BitHostRef) );
-	ARA_VALIDATE_ARGUMENT( NULL, 0 <= samplePosition );
-	ARA_VALIDATE_ARGUMENT( NULL, samplePosition + samplesPerChannel <= pSample->size() );
-	ARA_VALIDATE_ARGUMENT( buffers, buffers != NULL );
 
-	for ( int c = 0; c < iChannelCount; c++ )
+	// The controllerHostRef is a pointer to our ARAPlugin instance, which has a sample member containing our audio
+	if ( dbgASSERT( controllerHostRef, "Missing Controller Host Ref to our sample" ) )
 	{
-		ARA_VALIDATE_ARGUMENT( buffers, buffers[c] != NULL );
+		// Get sample
+		ARAPlugin * pPlugin = (ARAPlugin *) controllerHostRef;
+		UniSampler::Sample * pSample = pPlugin->GetCurrentRootSample();
 
-		bufferPtr = buffers[c];
-		for ( int i = 0; i < samplesPerChannel; i++ )
+		// Validate arguments
+		ARA_VALIDATE_ARGUMENT( readerHostRef, (readerHostRef == kAudioAccessor32BitHostRef) || (readerHostRef == kAudioAccessor64BitHostRef) );
+		ARA_VALIDATE_ARGUMENT( NULL, 0 <= samplePosition );
+		ARA_VALIDATE_ARGUMENT( NULL, samplePosition + samplesPerChannel <= pSample->size() );
+		ARA_VALIDATE_ARGUMENT( buffers, buffers != NULL );
+
+		// Get per channel audio
+		int iChannelCount = pSample->bStereo ? 2 : 1;
+		for ( int c = 0; c < iChannelCount; c++ )
 		{
-			/*
-			// create a pulsed sine: half a second sine with 440 Hz, half a second silence
-			double normalizedTime = (double)samplePosition * 440.0 / (double)kTestAudioSourceSampleRate;
-			double value = (fmod(normalizedTime, 440.0) <= 220.0) ? sin(normalizedTime * M_PI * 2.0) : 0.0;
-			*/
-			double value = pSample->at( c, samplePosition + i );
-			if ( pSample->bFloat == false )
-				value /= SHRT_MAX;
+			ARA_VALIDATE_ARGUMENT( buffers, buffers[c] != NULL );
 
-			if ( readerHostRef == kAudioAccessor64BitHostRef )
+			bufferPtr = buffers[c];
+			for ( int i = 0; i < samplesPerChannel; i++ )
 			{
-				double * doublePtr = (double *) bufferPtr;
-				*doublePtr++ = value;
-				bufferPtr = doublePtr;
-			}
-			else
-			{
-				float * floatPtr = (float *) bufferPtr;
-				*floatPtr++ = (float) value;
-				bufferPtr = floatPtr;
+				// Read the value from our sample relative to host sample pos, convert from short if necessary
+				double value = pSample->at( c, samplePosition + i );
+				if ( pSample->bFloat == false )
+					value /= SHRT_MAX;
+
+				if ( readerHostRef == kAudioAccessor64BitHostRef )
+				{
+					double * doublePtr = (double *) bufferPtr;
+					*doublePtr++ = value;
+					bufferPtr = doublePtr;
+				}
+				else
+				{
+					float * floatPtr = (float *) bufferPtr;
+					*floatPtr++ = (float) value;
+					bufferPtr = floatPtr;
+				}
 			}
 		}
+
+		return kARATrue;
 	}
 
-	return kARATrue;
+	return kARAFalse;
 }
 void ARA_CALL ARADestroyAudioReader( ARAAudioAccessControllerHostRef controllerHostRef, ARAAudioReaderHostRef readerHostRef )
 {
