@@ -1,13 +1,13 @@
-/*
-  ==============================================================================
+/******************************************************************************
 
-    This file was auto-generated!
+	ARAResamplerProcessor.h
 
-    It contains the basic framework code for a JUCE plugin processor.
+This class is essentially the basic JUCE processor that 
+additionally spawns a thread meant to manage an ARA plugin. 
+It communicates with the editor class to use the plugin 
+to generate a multisample synth patch from a single sample
 
-  ==============================================================================
-*/
-
+******************************************************************************/
 #pragma once
 
 #include <memory>
@@ -17,8 +17,9 @@
 
 #include "ICommand.h"
 
-class ARAResamplerEditor;
+// Forward declare sampler and editor class
 class UniSampler;
+class ARAResamplerEditor;
 
 //==============================================================================
 /**
@@ -26,9 +27,13 @@ class UniSampler;
 class ARAResamplerProcessor  : public AudioProcessor
 	, public ICommandListener
 {
-	static std::atomic_bool s_bInitStaticFX;
+	// Pointer to sampler and static bool indicating
+	// that we need to initialize static sampler members
+	static std::atomic_bool s_bInitSamplerStatic;
 	std::unique_ptr<UniSampler> m_pSampler;
 
+	// Thread safe access to the sample we'll
+	// be stretching and using with the ARA plugin
 	String m_strSampleToLoad;
 	std::mutex m_muLoadSample;
 public:
@@ -36,6 +41,7 @@ public:
     ARAResamplerProcessor();
 	~ARAResamplerProcessor();
 
+	// Access to UniSampler instance
 	UniSampler * GetSampler() const;
 
     //==============================================================================
@@ -67,23 +73,21 @@ public:
     void changeProgramName (int index, const String& newName) override;
 
     //==============================================================================
+	// These are not implemented - there isn't much of a patch to store
     void getStateInformation (MemoryBlock& destData) override;
     void setStateInformation (const void* data, int sizeInBytes) override;
 
-	bool SetRootPathString(String strDefaultPath);
-
+	// Command handler
 	void HandleCommand( CmdPtr pCMD ) override;
 
+	// ARA thread and lifetime management
 	std::atomic_bool m_abARAThreadRun;
 	std::thread m_ARAThread;
 
-	String GetCurrentFile();
-	String GetRootPath();
 	void OnEditorDestroyed();
 
 private:
-	MemoryBlock m_mbProgramText;
-	MemoryBlock m_mbRootPathText;
+	// Editor pointer and internal transport position
 	ARAResamplerEditor * m_pEditor;
 	float m_fHostPosInternal;
 

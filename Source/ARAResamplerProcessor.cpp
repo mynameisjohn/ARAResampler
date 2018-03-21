@@ -13,7 +13,8 @@
 #include "../UniSampler/Source/Plugin/UniSampler.h"
 #include "ARAUtils/ARAPlugin.h"
 
-/*static*/ std::atomic_bool ARAResamplerProcessor::s_bInitStaticFX(false);
+// Init static to false
+/*static*/ std::atomic_bool ARAResamplerProcessor::s_bInitSamplerStatic(false);
 
 //==============================================================================
 ARAResamplerProcessor::ARAResamplerProcessor()
@@ -31,18 +32,12 @@ ARAResamplerProcessor::ARAResamplerProcessor()
 {
 	m_pEditor = nullptr;
 
-	if ( s_bInitStaticFX.load() == false )
+	// THe first instance to see this is false should init static
+	if ( s_bInitSamplerStatic.load() == false )
 	{
-		s_bInitStaticFX.store( true );
+		s_bInitSamplerStatic.store( true );
 		UniSampler::InitStatic( 256 );
 	}
-
-	enum class ARAState
-	{
-		Init,
-		LoadSample,
-
-	};
 }
 
 ARAResamplerProcessor::~ARAResamplerProcessor()
@@ -117,30 +112,36 @@ void ARAResamplerProcessor::prepareToPlay ( double sampleRate, int samplesPerBlo
 	m_pSampler.reset( new UniSampler( sampleRate, 1.f ) );
 	m_pSampler->Enable( true );
 
-
-	// m_pARAPlugin->LoadPlugin( "Melodyne.vst3" );
+	// Now that sampler is initialized spawn the ARA thread and load th eplugin
 	m_abARAThreadRun.store( true );
 	m_ARAThread = std::thread( [this] ()
 	{
 		// Create plugin instance at start of thread
+		// (we're using Melodyne, which I symlink next to the .exe)
 		std::unique_ptr<ARAPlugin> pARAPlugin( new ARAPlugin( m_pSampler.get() ) );
 		pARAPlugin->LoadPlugin( "Melodyne.vst3" );
 
+		// While this thread needs to run
 		while ( m_abARAThreadRun.load() )
 		{
+			// Check if we have a new sample
 			String strSampleToLoad;
 			{
 				std::lock_guard<std::mutex> lgLoadSample( m_muLoadSample );
 				strSampleToLoad = m_strSampleToLoad;
 				m_strSampleToLoad.clear();
 			}
+
+			// Continue if we don't
 			if ( strSampleToLoad.isEmpty() )
 				continue;
 
+			// Otherwise ask the plugin to create the synth patch from the sample
 			pARAPlugin->CreateSamples( strSampleToLoad.toStdString(), m_pEditor );
 		}
 
-		// Must be destroyed on the thread it was created
+		// Destroy ARA plugin
+		// (must be destroyed on the thread it was created)
 		pARAPlugin.reset();
 	} );
 }
@@ -261,16 +262,19 @@ AudioProcessorEditor* ARAResamplerProcessor::createEditor()
 //==============================================================================
 void ARAResamplerProcessor::getStateInformation ( MemoryBlock& destData )
 {
+	// NYI
 }
 
 void ARAResamplerProcessor::setStateInformation ( const void* data, int sizeInBytes )
 {
+	// NYI
 }
 
 void ARAResamplerProcessor::HandleCommand( CmdPtr pCMD )
 {
 	switch ( pCMD->eType )
 	{
+		// Maybe pass a new sample to be loaded on the ARA thread
 		case ICommand::Type::SetARASample:
 		{
 			std::lock_guard<std::mutex> lgLoadSample( m_muLoadSample );
@@ -278,26 +282,6 @@ void ARAResamplerProcessor::HandleCommand( CmdPtr pCMD )
 			break;
 		}
 	}
-}
-
-bool ARAResamplerProcessor::SetRootPathString( String strDefaultPathString )
-{
-	std::string strDefaultPathStringSTD = strDefaultPathString.toStdString();
-
-	m_mbRootPathText.reset();
-	m_mbRootPathText.ensureSize( strDefaultPathStringSTD.length() + 1 );
-	m_mbRootPathText.copyFrom( strDefaultPathStringSTD.data(), 0, strDefaultPathStringSTD.length() + 1 );
-	return true;
-}
-
-String ARAResamplerProcessor::GetCurrentFile()
-{
-	return m_mbProgramText.toString();
-}
-
-String ARAResamplerProcessor::GetRootPath()
-{
-	return m_mbRootPathText.toString();
 }
 
 void ARAResamplerProcessor::OnEditorDestroyed()
