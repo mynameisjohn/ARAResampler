@@ -1,12 +1,12 @@
-/*
-==============================================================================
+/******************************************************************************
 
-This file was auto-generated!
+ARAResamplerEditor.h
 
-It contains the basic framework code for a JUCE plugin editor.
+Based on the basic JUCE plugin editor. Our Editor window has an OpenGL
+component where we draw our loaded sample waveform (if one exists) and 
+a MidiKeyboard component that indicates how many samples have been loaded
 
-==============================================================================
-*/
+******************************************************************************/
 
 #pragma once
 
@@ -28,18 +28,19 @@ class ARAResamplerEditor : public AudioProcessorEditor,
 	private MultiTimer,
 	public ICommandListener
 {
+	// Timer IDs
 	enum class ETimerID
 	{
 		REPAINT,
-		KBD_FOCUS,
-		KBD_LOAD
+		KBD_FOCUS
 	};
 	void timerCallback( int iTimerID ) override;
+
+	// Editor color and repaint flag
 	std::atomic_bool m_abNeedsRepaint;
 	Colour m_EditorColor;
 
 public:
-	void SetNeedsRepaint( Colour newColor );
 
 	ARAResamplerEditor ( ARAResamplerProcessor& );
 	~ARAResamplerEditor();
@@ -48,12 +49,16 @@ public:
 	void paint ( Graphics& ) override;
 	void resized() override;
 
+	// Receives info from the ARA thread on load status
 	void HandleCommand( CmdPtr pCMD ) override;
 
+	// Tell the ARA thread to load a new sample
 	void OnNewWave( File& f );
 
+	void SetNeedsRepaint( Colour newColor );
+
 private:
-	// Audio thumbnail
+	// Audio waveform drawer
 	AudioImageGL m_AudioImageRenderer;
 
 	// MIDI keyboard
