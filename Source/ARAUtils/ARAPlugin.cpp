@@ -8,8 +8,10 @@
 
 #include "../UniSampler/Source/Plugin/UniSampler.h"
 
+// Convenience for c++ code
 using namespace ARA;
 
+// Global assert function reference
 ARAAssertFunction assertFunction = &AraInterfaceAssert;
 ARAAssertFunction * assertFunctionReference = &assertFunction;
 
@@ -21,17 +23,46 @@ ARAPlugin::ARAPlugin( UniSampler * pSampler ) :
 	, m_pPluginExtensionInterface( nullptr )
 	, m_pARAFactory( nullptr )
 {
+	// Set assert reference in constructor (should probably be done 
+	// to handle multiple plugin instances in same memory space)
 	AraSetExternalAssertReference( assertFunctionReference );
 }
 
+// Clean up plugin resources on destruction
 ARAPlugin::~ARAPlugin()
 {
 	clear();
 }
 
+// Clean up any ARA resources and destroy our VST3 plugin
+void ARAPlugin::clear()
+{
+	// Destroy document controller
+	if ( m_pDocControllerInterface && m_pDocControllerRef )
+		m_pDocControllerInterface->destroyDocumentController( m_pDocControllerRef );
+	m_pDocControllerInterface = nullptr;
+	m_pDocControllerRef = nullptr;
+
+	// Uninitialize ARA plugin factory
+	if ( m_pARAFactory )
+	{
+		m_pARAFactory->uninitializeARA();
+		m_pARAFactory = nullptr;
+	}
+
+	// Clean up VST3 plugin 
+	m_vst3Plugin.Clear();
+
+	// Reset unique pointer members
+	m_upDocController.reset();
+	m_upDocProperties.reset();
+	m_pCurrentRootSample = nullptr;
+}
+
 // Try to load the plugin
 bool ARAPlugin::LoadPlugin( std::string strPluginName )
 {
+	// See if we can load it as a VST3
 	VST3ARAPlugin vst3Effect;
 	if ( !dbgASSERT( vst3Effect.LoadBinary( strPluginName ), "Unable to load VST3 Effect", strPluginName ) )
 		return false;
@@ -57,19 +88,21 @@ bool ARAPlugin::LoadPlugin( std::string strPluginName )
 	// Create ARA document
 	ARA_LOG( "TestHost: creating a document and hooking up plug-in instance" );
 
-	// Set this up such that we have access to the root sample as our ARAAudioAccessControllerHostRef
+	// Set up ARADocumentControllerHostInstance such that we have access to the this as our ARAAudioAccessControllerHostRef
 	std::unique_ptr<ARADocumentControllerHostInstance> upDocumentController( new ARADocumentControllerHostInstance ( { sizeof( ARADocumentControllerHostInstance), this, &hostAudioAccessControllerInterface,
 																											  kArchivingControllerHostRef, &hostArchivingInterface,
 																											  kContentAccessControllerHostRef, &hostContentAccessControllerInterface,
 																											  kModelUpdateControllerHostRef, &hostModelUpdateControllerInterface,
 																											  nullptr, nullptr } ) );
 
+	// Create ARA document
 	std::unique_ptr<ARADocumentProperties> upDocumentProperties;
 	upDocumentProperties.reset( new ARADocumentProperties( { sizeof( ARADocumentProperties ), "JUCE ARA Sampler" } ) );
 	const ARADocumentControllerInstance * documentControllerInstance = factory->createDocumentControllerWithDocument( upDocumentController.get(), upDocumentProperties.get() );
 	if ( !dbgASSERT( documentControllerInstance, "Unable to create document controller" ) )
 		return false;
 
+	// Get document controller reference and verify
 	const ARADocumentControllerRef documentControllerRef = documentControllerInstance->documentControllerRef;
 	const ARADocumentControllerInterface * documentControllerInterface = documentControllerInstance->documentControllerInterface;
 	if ( !dbgASSERT( documentControllerInterface &&
@@ -96,7 +129,7 @@ bool ARAPlugin::LoadPlugin( std::string strPluginName )
 	clear();
 	m_upDocController = std::move( upDocumentController );
 	m_upDocProperties = std::move( upDocumentProperties );
-	m_vst3Effect = std::move( vst3Effect );
+	m_vst3Plugin = std::move( vst3Effect );
 	m_pDocControllerInterface = documentControllerInterface;
 	m_pDocControllerRef = documentControllerRef;
 	m_pPluginRef = plugInExtensionRef;
@@ -105,28 +138,10 @@ bool ARAPlugin::LoadPlugin( std::string strPluginName )
 	m_strPluginName = strPluginName;
 }
 
-void ARAPlugin::clear()
-{
-	if ( m_pDocControllerInterface && m_pDocControllerRef )
-		m_pDocControllerInterface->destroyDocumentController( m_pDocControllerRef );
-	m_pDocControllerInterface = nullptr;
-	m_pDocControllerRef = nullptr;
-
-	if ( m_pARAFactory )
-	{
-		m_pARAFactory->uninitializeARA();
-		m_pARAFactory = nullptr;
-	}
-
-	m_vst3Effect.Clear();
-	m_upDocController.reset();
-	m_upDocProperties.reset();
-	m_pCurrentRootSample = nullptr;
-}
-
+// Load root sample and stretch it to create all other samples
 bool ARAPlugin::CreateSamples( std::string strRootSample, ICommandListener * pCMDListener /*= nullptr*/ )
 {
-	// Construct root sample - its validity is only as long as this function
+	// See if we can load the root sample
 	UniSampler::Sample rootSamp;
 
 	// Open the file
@@ -140,6 +155,8 @@ bool ARAPlugin::CreateSamples( std::string strRootSample, ICommandListener * pCM
 	rootSamp.iSampleRate = fileInfo.samplerate;
 	rootSamp.bFloat = (SF_FORMAT_FLOAT == (fileInfo.format & SF_FORMAT_SUBMASK));
 	int iSampleCount = fileInfo.channels * fileInfo.frames;
+
+	// Load float samples
 	if ( rootSamp.bFloat )
 	{
 		rootSamp.vfDataL.resize( iSampleCount );
@@ -147,6 +164,7 @@ bool ARAPlugin::CreateSamples( std::string strRootSample, ICommandListener * pCM
 
 		if ( rootSamp.bStereo )
 		{
+			// Deinterleave if stereo
 			rootSamp.vfDataR.resize( fileInfo.frames );
 			for ( int i = 0; i < fileInfo.frames; i++ )
 			{
@@ -156,14 +174,17 @@ bool ARAPlugin::CreateSamples( std::string strRootSample, ICommandListener * pCM
 			rootSamp.vfDataL.resize( fileInfo.frames );
 		}
 	}
-	// If the sample isn't float then we convert it to float
+	// If the sample isn't float then we convert it to float (makes things easier down the road)
 	else
 	{
+		// First read short samples
 		rootSamp.vsDataL.resize( iSampleCount );
 		ARA_VALIDATE_CONDITION( fileInfo.frames == sf_readf_short( pSndFile, rootSamp.vsDataL.data(), iSampleCount ) );
 
+		// Make room for float samples
 		rootSamp.vfDataL.resize( fileInfo.frames );
 
+		// Deinterleave and convert to float if stereo, otherwise convert to float and store
 		if ( rootSamp.bStereo )
 		{
 			rootSamp.vfDataR.resize( fileInfo.frames );
@@ -180,6 +201,8 @@ bool ARAPlugin::CreateSamples( std::string strRootSample, ICommandListener * pCM
 				rootSamp.vfDataL[i] = SHRT2FLT * rootSamp.vsDataL[i];;
 			}
 		}
+
+		// we no longer need short data - clear it and set float to true
 		rootSamp.vsDataL.clear();
 		rootSamp.bFloat = true;
 	}
@@ -187,9 +210,12 @@ bool ARAPlugin::CreateSamples( std::string strRootSample, ICommandListener * pCM
 	// Close input file
 	sf_close( pSndFile );
 
+	// Construct sample pool key for root sample and inject it into the pool
+	// from here on our use the pointer to the pool sample
 	std::string strSampleKey = str::ResolvePath( str::FixBackSlash( strRootSample ) );
-	m_pCurrentRootSample = UniSampler::InjectSample( strSampleKey, rootSamp );
+	m_pCurrentRootSample = UniSampler::InjectSample( strSampleKey, std::move( rootSamp ) );
 
+	// Notify listener that sample has been loaded
 	if ( pCMDListener )
 	{
 		cmdSampleLoaded cmd;
@@ -198,11 +224,11 @@ bool ARAPlugin::CreateSamples( std::string strRootSample, ICommandListener * pCM
 		pCMDListener->HandleCommand( CmdPtr( new cmdSampleLoaded( cmd ) ) );
 	}
 
-	// start editing the document
+	// start editing the document so we can add the sample as an audio source
 	m_pDocControllerInterface->beginEditing( m_pDocControllerRef );
 
-	// add an audio source to it and an audio modification to contain the edits for this source
-	ARAAudioSourceProperties audioSourceProperties = { sizeof( audioSourceProperties ), "Test audio source", "audioSourceTestPersistentID",
+	// Create audio source properties for our root sample
+	ARAAudioSourceProperties audioSourceProperties = { sizeof( audioSourceProperties ), "Root Sample", "rootSamplePersistentID",
 		m_pCurrentRootSample->size(), (double) m_pCurrentRootSample->iSampleRate, fileInfo.channels, kARAFalse };
 
 	// Create audio source and provide the root sample pointer as the host reference (we'll use it when the plugin reads the audio data)
@@ -222,6 +248,7 @@ bool ARAPlugin::CreateSamples( std::string strRootSample, ICommandListener * pCM
 	ARAPlaybackRegionProperties playbackRegionProperties = { sizeof( playbackRegionProperties ), kARAPlaybackTransformationNoChanges,
 		0, dRootDurInSeconds, 0, dRootDurInSeconds, musicalContextRef };
 
+	// All we'll be doing is time stretching
 	playbackRegionProperties.transformationFlags |= kARAPlaybackTransformationTimestretch;
 
 	// add a playback region to render modification in our musical context
@@ -238,10 +265,7 @@ bool ARAPlugin::CreateSamples( std::string strRootSample, ICommandListener * pCM
 		ARABool allDone = kARATrue;
 		ARASize i;
 
-		// this is a crude test implementation - real code wouldn't implement such a simple infinite loop.
-		// instead, it would periodically request notifications and evaluate incoming calls to notifyAudioSourceContentChanged().
-		// further, it would evaluate notifyAudioSourceAnalysisProgress() to provide proper progress indication,
-		// and offer the user a way to cancel the operation if desired.
+
 		m_pDocControllerInterface->notifyModelUpdates( m_pDocControllerRef );
 
 		for ( i = 0; i < m_pARAFactory->analyzeableContentTypesCount; ++i )
@@ -262,10 +286,10 @@ bool ARAPlugin::CreateSamples( std::string strRootSample, ICommandListener * pCM
 #endif
 	}
 
-	// Get note data - the sample should be a single note
+	// Get note data - the sample should be a single note, but take the first note anyways
 	if ( dbgASSERT( m_pDocControllerInterface->isAudioSourceContentAvailable( m_pDocControllerRef, audioSourceRef, kARAContentTypeNotes ), "Unable to extract note data from sample", strRootSample ) )
 	{
-		// Create teh content reader so that we can extract note data from the source audio
+		// Create the content reader so that we can extract note data from the source audio
 		ARAContentReaderRef contentReaderRef = m_pDocControllerInterface->createAudioSourceContentReader( m_pDocControllerRef, audioSourceRef, kARAContentTypeNotes, NULL );
 		ARAInt32 eventCount = m_pDocControllerInterface->getContentReaderEventCount( m_pDocControllerRef, contentReaderRef );
 
@@ -292,21 +316,27 @@ bool ARAPlugin::CreateSamples( std::string strRootSample, ICommandListener * pCM
 				pGroupEl->SetAttribute( "attack", 0.05f );
 				pGroupEl->SetAttribute( "release", 0.5f );
 
-				VST3ARAPlugin::RenderContext rc( &m_vst3Effect, m_pCurrentRootSample->bStereo );
+				// Create scoped rendering context now
+				VST3ARAPlugin::RenderContext rc( &m_vst3Plugin, m_pCurrentRootSample->bStereo );
 
 				// For every MIDI note
 // #pragma omp parallel for
 				for ( int n = 0; n < 128; n++ )
 				{
-					// Skip the root note, add it to the pool as is
+					// The root note is already in the pool, so we don't need a new stretched sample key
 					std::string strStretchedKey = strSampleKey;
 					if ( n != iRootNote )
 					{
-						strStretchedKey = str::StripExtension( strSampleKey ) + to_str( n ) + str::GetExtension( strRootSample );
+						// Otherwise construct a stretched sample key (add MIDI note number)
+						strStretchedKey = str::StripExtension( strSampleKey ) + "_" + to_str( n ) + str::GetExtension( strRootSample );
 
-						// Create and configure new sample
+						/// Create and configure new sample
+						// Compute pitch ratio between this MIDI note and our root note
+						// and use it to determine how many samples there will be post stretch
 						double dRatio = pow( 2, (n - (double) iRootNote) / 12. );
 						int iNewSampleCount = dRatio * m_pCurrentRootSample->size() + 0.5;
+
+						// Create output buffer for stretched audio
 						float * apStretched[2]{ nullptr };
 						std::vector<float> vStretched[2];
 						for ( int c = 0; c < fileInfo.channels; c++ )
@@ -315,7 +345,7 @@ bool ARAPlugin::CreateSamples( std::string strRootSample, ICommandListener * pCM
 							apStretched[c] = vStretched[c].data();
 						}
 
-// #pragma omp critical
+// #pragma omp critical // (this actually can't be done on another thread - or can it?)
 						{
 							// Stretch the sample by its pitch ratio relative to the root
 							m_pDocControllerInterface->beginEditing( m_pDocControllerRef );;
@@ -323,6 +353,7 @@ bool ARAPlugin::CreateSamples( std::string strRootSample, ICommandListener * pCM
 							m_pDocControllerInterface->updatePlaybackRegionProperties( m_pDocControllerRef, playbackRegionRef, &playbackRegionProperties );
 							m_pDocControllerInterface->endEditing( m_pDocControllerRef );
 
+							// Render the sample into our stretch buffer in blocks (can't be too large or Melodyne crashes)
 							int nBlockSize = 1024;
 							int nBlocks = iNewSampleCount / nBlockSize + (int) (iNewSampleCount % nBlockSize != 0);
 							int nSamplesLeft = iNewSampleCount;
@@ -331,11 +362,12 @@ bool ARAPlugin::CreateSamples( std::string strRootSample, ICommandListener * pCM
 							{
 								float * apProcess[2] = { apStretched[0] + iHostPos, (apStretched[1] ? apStretched[1] + iHostPos : nullptr) };
 								int nSamplesToProcess = dsp::Clamp( nSamplesLeft, 0, nBlockSize );
-								m_vst3Effect.Process( dsp::Clamp( nSamplesLeft, 0, nBlockSize ), fileInfo.samplerate, iHostPos, apProcess, fileInfo.channels );
+								m_vst3Plugin.Process( dsp::Clamp( nSamplesLeft, 0, nBlockSize ), fileInfo.samplerate, iHostPos, apProcess, fileInfo.channels );
 								iHostPos += nSamplesToProcess;
 							}
 						}
 
+						// Construct the stretched sample (we'll actually be interpolating it to the root sample's size)
 						UniSampler::Sample sampleStretched;
 						sampleStretched.iSampleRate = m_pCurrentRootSample->iSampleRate;
 						sampleStretched.bFloat = m_pCurrentRootSample->bFloat;
@@ -343,21 +375,23 @@ bool ARAPlugin::CreateSamples( std::string strRootSample, ICommandListener * pCM
 						sampleStretched.vfDataL.resize( m_pCurrentRootSample->vfDataL.size() );
 						sampleStretched.vfDataR.resize( m_pCurrentRootSample->vfDataR.size() );
 
+						// Resample the stretched sample such that its duration matches the duration of the root sample
 						float * apOutput[2] = { sampleStretched.vfDataL.data(), sampleStretched.vfDataR.data() };
 						for ( int c = 0; c < fileInfo.channels; c++ )
-							dsp::Resample_Cubic( apOutput[c], apStretched[c], 0, dRatio, m_pCurrentRootSample->size(), iNewSampleCount );
+							dsp::Resample_Cubic( apOutput[c], apStretched[c], (double)0., dRatio, m_pCurrentRootSample->size(), iNewSampleCount );
 
-						// Now add the stretched and then repitched sample to the pool
+						// Add this sample to the pool
 						UniSampler::InjectSample( strStretchedKey, sampleStretched );
+					}
 
-						if ( pCMDListener )
-						{
-							cmdRegionCreated cmd;
-							cmd.strSampleName = strStretchedKey;
-							cmd.iMIDINote = n;
-							cmd.strSampleName = strRootSample;
-							pCMDListener->HandleCommand( CmdPtr( new cmdRegionCreated( cmd ) ) );
-						}
+					// Notify the listener that we're done with this MIDI note
+					if ( pCMDListener )
+					{
+						cmdRegionCreated cmd;
+						cmd.strSampleName = strStretchedKey;
+						cmd.iMIDINote = n;
+						cmd.strSampleName = strRootSample;
+						pCMDListener->HandleCommand( CmdPtr( new cmdRegionCreated( cmd ) ) );
 					}
 
 					// Add the sample to the XML doc as a region
@@ -390,8 +424,13 @@ bool ARAPlugin::CreateSamples( std::string strRootSample, ICommandListener * pCM
 	m_pDocControllerInterface->destroyAudioSource( m_pDocControllerRef, audioSourceRef );
 	m_pDocControllerInterface->destroyMusicalContext( m_pDocControllerRef, musicalContextRef );
 	m_pDocControllerInterface->endEditing( m_pDocControllerRef );
+
+	// Null out this sample - noone should need it now
+	m_pCurrentRootSample = nullptr;
 }
 
+// Get access to the current root sample
+// This is only valid for the scope of CreateSamples
 UniSampler::Sample * ARAPlugin::GetCurrentRootSample() const
 {
 	return m_pCurrentRootSample;
