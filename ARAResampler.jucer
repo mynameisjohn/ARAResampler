@@ -18,8 +18,9 @@
         <FILE id="j9ulT7" name="ARAPlugin.cpp" compile="1" resource="0" file="Source/ARAUtils/ARAPlugin.cpp"/>
         <FILE id="IvwnW7" name="ARAPlugin.h" compile="0" resource="0" file="Source/ARAUtils/ARAPlugin.h"/>
         <FILE id="hMzYpp" name="ARAUtil.h" compile="0" resource="0" file="Source/ARAUtils/ARAUtil.h"/>
-        <FILE id="XotGs6" name="VST3Effect.cpp" compile="1" resource="0" file="Source/ARAUtils/VST3Effect.cpp"/>
-        <FILE id="eccwww" name="VST3Effect.h" compile="0" resource="0" file="Source/ARAUtils/VST3Effect.h"/>
+        <FILE id="SXtL7c" name="VST3ARAPlugin.cpp" compile="1" resource="0"
+              file="Source/ARAUtils/VST3ARAPlugin.cpp"/>
+        <FILE id="lCJpTG" name="VST3ARAPlugin.h" compile="0" resource="0" file="Source/ARAUtils/VST3ARAPlugin.h"/>
       </GROUP>
       <GROUP id="{CA4688B7-26AC-C060-DAF0-71411E745DF0}" name="ARA">
         <FILE id="Ly6hAY" name="ARAAudioUnit.h" compile="0" resource="0" file="Source/ARA/ARAAudioUnit.h"/>

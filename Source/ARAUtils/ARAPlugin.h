@@ -5,14 +5,14 @@
 
 #include "../ARA/ARAInterface.h"
 
-#include "VST3Effect.h"
+#include "VST3ARAPlugin.h"
 #include "../UniSampler/Source/Plugin/UniSampler.h"
 #include "../ICommand.h"
 
 class ARAPlugin
 {
 	std::string m_strPluginName;
-	VST3Effect m_vst3Effect;
+	VST3ARAPlugin m_vst3Effect;
 	UniSampler * m_pSampler;
 	UniSampler::Sample * m_pCurrentRootSample;
 	std::unique_ptr<ARA::ARADocumentControllerHostInstance> m_upDocController;

@@ -1,4 +1,4 @@
-#include "VST3Effect.h"
+#include "VST3ARAPlugin.h"
 
 // This must be defined while we include
 // the VST3 SDK and undefined afterwards
@@ -45,13 +45,13 @@ using namespace Vst;
 using namespace ARA;
 
 // Make sure these are null to start
-VST3Effect::VST3Effect() :
+VST3ARAPlugin::VST3ARAPlugin() :
 	m_libHandle( nullptr ),
 	m_pComponent( nullptr )
 {}
 
 // Transfer ownership of the plugin resources completely
-VST3Effect::VST3Effect( VST3Effect&& other )
+VST3ARAPlugin::VST3ARAPlugin( VST3ARAPlugin&& other )
 {
 	m_libHandle = other.m_libHandle;
 	other.m_libHandle = nullptr;
@@ -62,7 +62,7 @@ VST3Effect::VST3Effect( VST3Effect&& other )
 }
 
 // Transfer ownership of the plugin resources completely
-VST3Effect& VST3Effect::operator=( VST3Effect&& other )
+VST3ARAPlugin& VST3ARAPlugin::operator=( VST3ARAPlugin&& other )
 {
 	m_libHandle = other.m_libHandle;
 	other.m_libHandle = nullptr;
@@ -74,13 +74,13 @@ VST3Effect& VST3Effect::operator=( VST3Effect&& other )
 }
 
 // Free any resources
-VST3Effect::~VST3Effect() 
+VST3ARAPlugin::~VST3ARAPlugin() 
 {
 	Clear();
 }
 
 // Free or release whatever we've allocated
-void VST3Effect::Clear()
+void VST3ARAPlugin::Clear()
 {
 	// Tear down plugin component
 	if ( m_pComponent )
@@ -113,13 +113,13 @@ void VST3Effect::Clear()
 }
 
 // Plugin component access
-IComponent * VST3Effect::GetComponent() const
+IComponent * VST3ARAPlugin::GetComponent() const
 {
 	return m_pComponent;
 }
 
 // ARA factory access
-const ARA::ARAFactory * VST3Effect::GetARAFactory()
+const ARA::ARAFactory * VST3ARAPlugin::GetARAFactory()
 {
 	const ARA::ARAFactory * result = NULL;
 
@@ -134,7 +134,7 @@ const ARA::ARAFactory * VST3Effect::GetARAFactory()
 }
 
 // Access to ARA plugin extension
-const ARA::ARAPlugInExtensionInstance * VST3Effect::GetARAPlugInExtension( ARA::ARADocumentControllerRef controllerRef )
+const ARA::ARAPlugInExtensionInstance * VST3ARAPlugin::GetARAPlugInExtension( ARA::ARADocumentControllerRef controllerRef )
 {
 	const ARA::ARAPlugInExtensionInstance * result = NULL;
 
@@ -152,13 +152,13 @@ const ARA::ARAPlugInExtensionInstance * VST3Effect::GetARAPlugInExtension( ARA::
 
 
 // Do we have a library and component?
-bool VST3Effect::isValid() const
+bool VST3ARAPlugin::isValid() const
 {
 	return m_libHandle && m_pComponent;
 }
 
 // Construct scoped rendering context
-VST3Effect::RenderContext::RenderContext( VST3Effect * pVST3Effect, bool bStereo ) :
+VST3ARAPlugin::RenderContext::RenderContext( VST3ARAPlugin * pVST3Effect, bool bStereo ) :
 	m_pComponent( nullptr )
 {
 	if ( dbgASSERT( pVST3Effect, "Missing VST3 Plugin for render context" ) )
@@ -215,7 +215,7 @@ VST3Effect::RenderContext::RenderContext( VST3Effect * pVST3Effect, bool bStereo
 }
 
 // Clean up rendereing context (deactivate buses)
-VST3Effect::RenderContext::~RenderContext()
+VST3ARAPlugin::RenderContext::~RenderContext()
 {
 	if ( m_pComponent )
 	{
@@ -234,7 +234,7 @@ VST3Effect::RenderContext::~RenderContext()
 }
 
 // Load the plugin binary from disk
-bool VST3Effect::LoadBinary( std::string strPluginName )
+bool VST3ARAPlugin::LoadBinary( std::string strPluginName )
 {
 	// Return success
 	bool bLoadSuccess = false;
@@ -371,7 +371,7 @@ bool VST3Effect::LoadBinary( std::string strPluginName )
 }
 
 // Process function
-void VST3Effect::Process( int iLength, double dSampleRate, int iHostSamplePos, float ** ppData, int iChannelCount )
+void VST3ARAPlugin::Process( int iLength, double dSampleRate, int iHostSamplePos, float ** ppData, int iChannelCount )
 {
 	// Get processor component
 	IAudioProcessor * processor = NULL;

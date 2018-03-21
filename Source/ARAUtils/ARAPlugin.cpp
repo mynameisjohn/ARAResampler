@@ -32,7 +32,7 @@ ARAPlugin::~ARAPlugin()
 // Try to load the plugin
 bool ARAPlugin::LoadPlugin( std::string strPluginName )
 {
-	VST3Effect vst3Effect;
+	VST3ARAPlugin vst3Effect;
 	if ( !dbgASSERT( vst3Effect.LoadBinary( strPluginName ), "Unable to load VST3 Effect", strPluginName ) )
 		return false;
 
@@ -292,7 +292,7 @@ bool ARAPlugin::CreateSamples( std::string strRootSample, ICommandListener * pCM
 				pGroupEl->SetAttribute( "attack", 0.05f );
 				pGroupEl->SetAttribute( "release", 0.5f );
 
-				VST3Effect::RenderContext rc( &m_vst3Effect, m_pCurrentRootSample->bStereo );
+				VST3ARAPlugin::RenderContext rc( &m_vst3Effect, m_pCurrentRootSample->bStereo );
 
 				// For every MIDI note
 // #pragma omp parallel for

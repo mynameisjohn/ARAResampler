@@ -1,5 +1,5 @@
 /***************************************************************
-VST3Effect class
+VST3ARAPlugin class
 
 A C++ class meant to wrap a simple ARA VST3 plugin. The plugin 
 will be loaded as a binary from disk and its processor
@@ -23,7 +23,7 @@ namespace Steinberg
 }
 
 //-------------------------------------------------------------------------------------------------------
-class VST3Effect
+class VST3ARAPlugin
 {
 	// Platform specific library handles
 #if defined(_MSC_VER)
@@ -44,18 +44,18 @@ class VST3Effect
 
 public:
 	// Lifetime of plugin and resources live with the class instance
-	VST3Effect();
-	~VST3Effect();
+	VST3ARAPlugin();
+	~VST3ARAPlugin();
 
 	// We don't allow copy constructors because this instance is
 	// tied to the lifetime of a plugin instance
-	VST3Effect( const VST3Effect& other ) = delete;
-	VST3Effect& operator=( const VST3Effect& other ) = delete;
+	VST3ARAPlugin( const VST3ARAPlugin& other ) = delete;
+	VST3ARAPlugin& operator=( const VST3ARAPlugin& other ) = delete;
 
 	// We do allow move constructors, which will transfer 
 	// ownership of the plugin from one instance to another
-	VST3Effect( VST3Effect&& other );
-	VST3Effect& operator=( VST3Effect&& other );
+	VST3ARAPlugin( VST3ARAPlugin&& other );
+	VST3ARAPlugin& operator=( VST3ARAPlugin&& other );
 
 	// Free all plugin resources
 	void Clear();
@@ -67,7 +67,7 @@ public:
 		Steinberg::Vst::IComponent * m_pComponent;
 	public:
 		~RenderContext();
-		RenderContext( VST3Effect * pVST3Effect, bool bStereo );
+		RenderContext( VST3ARAPlugin * pVST3Effect, bool bStereo );
 	};
 
 	// Load the plugin binary from disk (returns success)
