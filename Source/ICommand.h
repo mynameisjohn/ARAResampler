@@ -1,5 +1,7 @@
 #pragma once
 
+// Simple command pattern that I'm using to send data across the ARA / UI thread
+
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "../UniSampler/Source/Plugin/UniSampler.h"
 
@@ -7,10 +9,10 @@ struct ICommand
 {
 	enum class Type
 	{
-		SetARASample,
-		SampleLoaded,
-		RegionCreated,
-		ProgramSet,
+		SetARASample,   // We have a new ARA sample to load
+		SampleLoaded,   // The sample has loaded successfully
+		RegionCreated,  // A new region has been created from the sample
+		ProgramSet,     // All regions are loaded and synth patch is set
 		None
 	};
 	Type eType;
