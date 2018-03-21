@@ -94,7 +94,6 @@ bool ARAResampler::LoadPlugin( std::string strPluginName )
 																											  kContentAccessControllerHostRef, &hostContentAccessControllerInterface,
 																											  kModelUpdateControllerHostRef, &hostModelUpdateControllerInterface,
 																											  nullptr, nullptr } ) );
-
 	// Create ARA document
 	std::unique_ptr<ARADocumentProperties> upDocumentProperties;
 	upDocumentProperties.reset( new ARADocumentProperties( { sizeof( ARADocumentProperties ), "JUCE ARA Sampler" } ) );

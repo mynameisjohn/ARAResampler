@@ -1,7 +1,7 @@
 #pragma once
 
 /***************************************************************
-ARAPlugin class
+ARAResampler class
 
 Simple C++ class meant to wrap an ARA plugin (Melodyne, specifically)
 and create a multisample instrument from a single sample. This works
