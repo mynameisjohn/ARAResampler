@@ -11,21 +11,20 @@
               pluginProducesMidiOut="0" pluginIsMidiEffectPlugin="0" pluginEditorRequiresKeys="0"
               pluginAUExportPrefix="ARAResamplerAU" pluginRTASCategory="" aaxIdentifier="com.JJ.ARAResampler"
               pluginAAXCategory="AAX_ePlugInCategory_Dynamics" jucerVersion="5.3.0"
-              headerPath="$(SDK)/libsndfile/include;&#10;$(CUDA_PATH)/include;">
+              headerPath="$(SDK)/libsndfile/include;&#10;$(CUDA_PATH)/include;&#10;Source/ARA;&#10;Source/ARAUtils;&#10;Source/Unisampler/Source/Plugin;">
   <MAINGROUP id="s9yGl0" name="ARAResampler">
     <GROUP id="{7C456696-34ED-9DCF-2FBB-D57A35221EE8}" name="Source">
-      <GROUP id="{AD1E1B44-2819-3848-36D2-961B50FD1D4B}" name="Util">
-        <FILE id="NK5A8b" name="ARAPlugin.h" compile="0" resource="0" file="Source/ARA/ARAPlugin.h"/>
-        <FILE id="Qy6yHY" name="ARAPlugin.cpp" compile="1" resource="0" file="Source/ARA/ARAPlugin.cpp"/>
-        <FILE id="UWCBMy" name="VST3Effect.h" compile="0" resource="0" file="Source/ARA/VST3Effect.h"/>
-        <FILE id="UPZsDt" name="VST3Effect.cpp" compile="1" resource="0" file="Source/ARA/VST3Effect.cpp"/>
+      <GROUP id="{AD1E1B44-2819-3848-36D2-961B50FD1D4B}" name="ARAUtils">
+        <FILE id="j9ulT7" name="ARAPlugin.cpp" compile="1" resource="0" file="Source/ARAUtils/ARAPlugin.cpp"/>
+        <FILE id="IvwnW7" name="ARAPlugin.h" compile="0" resource="0" file="Source/ARAUtils/ARAPlugin.h"/>
+        <FILE id="hMzYpp" name="ARAUtil.h" compile="0" resource="0" file="Source/ARAUtils/ARAUtil.h"/>
+        <FILE id="XotGs6" name="VST3Effect.cpp" compile="1" resource="0" file="Source/ARAUtils/VST3Effect.cpp"/>
+        <FILE id="eccwww" name="VST3Effect.h" compile="0" resource="0" file="Source/ARAUtils/VST3Effect.h"/>
       </GROUP>
       <GROUP id="{CA4688B7-26AC-C060-DAF0-71411E745DF0}" name="ARA">
         <FILE id="Ly6hAY" name="ARAAudioUnit.h" compile="0" resource="0" file="Source/ARA/ARAAudioUnit.h"/>
         <FILE id="C7q72J" name="AraDebug.c" compile="1" resource="0" file="Source/ARA/AraDebug.c"/>
         <FILE id="AlGRWm" name="AraDebug.h" compile="0" resource="0" file="Source/ARA/AraDebug.h"/>
-        <FILE id="R44fEu" name="ARAExampleUtil.h" compile="0" resource="0"
-              file="Source/ARA/ARAExampleUtil.h"/>
         <FILE id="X5LpJ2" name="ARAInterface.h" compile="0" resource="0" file="Source/ARA/ARAInterface.h"/>
         <FILE id="JIYyI4" name="ARAVST2.h" compile="0" resource="0" file="Source/ARA/ARAVST2.h"/>
         <FILE id="M2vREo" name="ARAVST3.h" compile="0" resource="0" file="Source/ARA/ARAVST3.h"/>
@@ -72,6 +71,10 @@
           <FILE id="IybIxV" name="tinyxml2.h" compile="0" resource="0" file="UniSampler/Source/tinyxml2/tinyxml2.h"/>
         </GROUP>
       </GROUP>
+      <FILE id="tw4KLT" name="AudioImageGL.cpp" compile="1" resource="0"
+            file="Source/AudioImageGL.cpp"/>
+      <FILE id="V7jw1g" name="AudioImageGL.h" compile="0" resource="0" file="Source/AudioImageGL.h"/>
+      <FILE id="HCAAFg" name="ICommand.h" compile="0" resource="0" file="Source/ICommand.h"/>
       <FILE id="dPziEn" name="PluginProcessor.cpp" compile="1" resource="0"
             file="Source/PluginProcessor.cpp"/>
       <FILE id="keKofT" name="PluginProcessor.h" compile="0" resource="0"
