@@ -21,7 +21,7 @@ don't drag on forever).
 #include "../UniSampler/Source/Plugin/UniSampler.h"
 #include "../ICommand.h"
 
-class ARAPlugin
+class ARAResampler
 {
 	// Name of ARA plugin (must be a VST3)
 	std::string m_strPluginName;
@@ -52,8 +52,8 @@ class ARAPlugin
 	void clear();
 
 public:
-	ARAPlugin( UniSampler * pSampler );
-	~ARAPlugin();
+	ARAResampler( UniSampler * pSampler );
+	~ARAResampler();
 
 	// Load an ARA plugin from disk
 	bool LoadPlugin( std::string strPluginName );

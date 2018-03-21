@@ -3,7 +3,7 @@
 #include "../ARA/AraDebug.h"
 #include "../ARA/ARAVST3.h"
 
-#include "ARAPlugin.h"
+#include "ARAResampler.h"
 #include "ARAUtil.h"
 
 #include "../UniSampler/Source/Plugin/UniSampler.h"
@@ -15,7 +15,7 @@ using namespace ARA;
 ARAAssertFunction assertFunction = &AraInterfaceAssert;
 ARAAssertFunction * assertFunctionReference = &assertFunction;
 
-ARAPlugin::ARAPlugin( UniSampler * pSampler ) :
+ARAResampler::ARAResampler( UniSampler * pSampler ) :
 	m_pSampler( pSampler )
 	, m_pDocControllerInterface( nullptr )
 	, m_pDocControllerRef( nullptr )
@@ -29,13 +29,13 @@ ARAPlugin::ARAPlugin( UniSampler * pSampler ) :
 }
 
 // Clean up plugin resources on destruction
-ARAPlugin::~ARAPlugin()
+ARAResampler::~ARAResampler()
 {
 	clear();
 }
 
 // Clean up any ARA resources and destroy our VST3 plugin
-void ARAPlugin::clear()
+void ARAResampler::clear()
 {
 	// Destroy document controller
 	if ( m_pDocControllerInterface && m_pDocControllerRef )
@@ -60,7 +60,7 @@ void ARAPlugin::clear()
 }
 
 // Try to load the plugin
-bool ARAPlugin::LoadPlugin( std::string strPluginName )
+bool ARAResampler::LoadPlugin( std::string strPluginName )
 {
 	// See if we can load it as a VST3
 	VST3ARAPlugin vst3Effect;
@@ -139,7 +139,7 @@ bool ARAPlugin::LoadPlugin( std::string strPluginName )
 }
 
 // Load root sample and stretch it to create all other samples
-bool ARAPlugin::CreateSamples( std::string strRootSample, ICommandListener * pCMDListener /*= nullptr*/ )
+bool ARAResampler::CreateSamples( std::string strRootSample, ICommandListener * pCMDListener /*= nullptr*/ )
 {
 	// See if we can load the root sample
 	UniSampler::Sample rootSamp;
@@ -431,7 +431,7 @@ bool ARAPlugin::CreateSamples( std::string strRootSample, ICommandListener * pCM
 
 // Get access to the current root sample
 // This is only valid for the scope of CreateSamples
-UniSampler::Sample * ARAPlugin::GetCurrentRootSample() const
+UniSampler::Sample * ARAResampler::GetCurrentRootSample() const
 {
 	return m_pCurrentRootSample;
 }

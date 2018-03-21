@@ -11,7 +11,7 @@
 #include "ARAResamplerProcessor.h"
 #include "ARAResamplerEditor.h"
 #include "../UniSampler/Source/Plugin/UniSampler.h"
-#include "ARAUtils/ARAPlugin.h"
+#include "ARAUtils/ARAResampler.h"
 
 // Init static to false
 /*static*/ std::atomic_bool ARAResamplerProcessor::s_bInitSamplerStatic(false);
@@ -118,7 +118,7 @@ void ARAResamplerProcessor::prepareToPlay ( double sampleRate, int samplesPerBlo
 	{
 		// Create plugin instance at start of thread
 		// (we're using Melodyne, which I symlink next to the .exe)
-		std::unique_ptr<ARAPlugin> pARAPlugin( new ARAPlugin( m_pSampler.get() ) );
+		std::unique_ptr<ARAResampler> pARAPlugin( new ARAResampler( m_pSampler.get() ) );
 		pARAPlugin->LoadPlugin( "Melodyne.vst3" );
 
 		// While this thread needs to run

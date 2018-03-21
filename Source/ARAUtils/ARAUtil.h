@@ -57,7 +57,7 @@ ARABool ARA_CALL ARAReadAudioSamples( ARAAudioAccessControllerHostRef controller
 	if ( dbgASSERT( controllerHostRef, "Missing Controller Host Ref to our sample" ) )
 	{
 		// Get sample
-		ARAPlugin * pPlugin = (ARAPlugin *) controllerHostRef;
+		ARAResampler * pPlugin = (ARAResampler *) controllerHostRef;
 		UniSampler::Sample * pSample = pPlugin->GetCurrentRootSample();
 
 		// Validate arguments
@@ -286,7 +286,7 @@ void ARA_CALL ARANotifyAudioSourceContentChanged( ARAModelUpdateControllerHostRe
 {
 	ARA_VALIDATE_ARGUMENT( controllerHostRef, controllerHostRef == kModelUpdateControllerHostRef );
 	// ARA_VALIDATE_ARGUMENT( audioSourceHostRef, audioSourceHostRef == kHostAudioSourceHostRef );
-	ARAPlugin * pPlugin = (ARAPlugin *) audioSourceHostRef;
+	ARAResampler * pPlugin = (ARAResampler *) audioSourceHostRef;
 	UniSampler::Sample * pSample = pPlugin->GetCurrentRootSample();
 	dbgASSERT( audioSourceHostRef, "Missing Audio Source Host Ref to our sample" );
 	if ( range )
