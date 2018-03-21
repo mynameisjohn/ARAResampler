@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<JUCERPROJECT id="b9uWd6" name="ARAResampler" displaySplashScreen="1" reportAppUsage="1"
+              splashScreenColour="Dark" projectType="audioplug" version="1.0.0"
+              bundleIdentifier="com.JJ.ARAResampler" includeBinaryInAppConfig="1"
+              cppLanguageStandard="11" companyCopyright="" buildVST="0" buildVST3="1"
+              buildAU="0" buildAUv3="0" buildRTAS="0" buildAAX="0" buildStandalone="1"
+              enableIAA="0" pluginName="ARAResampler" pluginDesc="ARAResampler"
+              pluginManufacturer="JJ" pluginManufacturerCode="Manu" pluginCode="B9uw"
+              pluginChannelConfigs="" pluginIsSynth="1" pluginWantsMidiIn="1"
+              pluginProducesMidiOut="0" pluginIsMidiEffectPlugin="0" pluginEditorRequiresKeys="0"
+              pluginAUExportPrefix="ARAResamplerAU" pluginRTASCategory="" aaxIdentifier="com.JJ.ARAResampler"
+              pluginAAXCategory="AAX_ePlugInCategory_Dynamics" jucerVersion="5.3.0"
+              headerPath="$(SDK)/libsndfile/include;&#10;$(CUDA_PATH)/include;">
+  <MAINGROUP id="s9yGl0" name="ARAResampler">
+    <GROUP id="{7C456696-34ED-9DCF-2FBB-D57A35221EE8}" name="Source">
+      <GROUP id="{AD1E1B44-2819-3848-36D2-961B50FD1D4B}" name="Util">
+        <FILE id="NK5A8b" name="ARAPlugin.h" compile="0" resource="0" file="Source/ARA/ARAPlugin.h"/>
+        <FILE id="Qy6yHY" name="ARAPlugin.cpp" compile="1" resource="0" file="Source/ARA/ARAPlugin.cpp"/>
+        <FILE id="UWCBMy" name="VST3Effect.h" compile="0" resource="0" file="Source/ARA/VST3Effect.h"/>
+        <FILE id="UPZsDt" name="VST3Effect.cpp" compile="1" resource="0" file="Source/ARA/VST3Effect.cpp"/>
+      </GROUP>
+      <GROUP id="{CA4688B7-26AC-C060-DAF0-71411E745DF0}" name="ARA">
+        <FILE id="Ly6hAY" name="ARAAudioUnit.h" compile="0" resource="0" file="Source/ARA/ARAAudioUnit.h"/>
+        <FILE id="C7q72J" name="AraDebug.c" compile="1" resource="0" file="Source/ARA/AraDebug.c"/>
+        <FILE id="AlGRWm" name="AraDebug.h" compile="0" resource="0" file="Source/ARA/AraDebug.h"/>
+        <FILE id="R44fEu" name="ARAExampleUtil.h" compile="0" resource="0"
+              file="Source/ARA/ARAExampleUtil.h"/>
+        <FILE id="X5LpJ2" name="ARAInterface.h" compile="0" resource="0" file="Source/ARA/ARAInterface.h"/>
+        <FILE id="JIYyI4" name="ARAVST2.h" compile="0" resource="0" file="Source/ARA/ARAVST2.h"/>
+        <FILE id="M2vREo" name="ARAVST3.h" compile="0" resource="0" file="Source/ARA/ARAVST3.h"/>
+      </GROUP>
+      <GROUP id="{35E58AF6-9CE4-139B-B1EC-1A09979B8533}" name="Unisampler">
+        <GROUP id="{5C8A9FC6-6E8B-82E5-7F81-2F8A083FCBDB}" name="Plugin">
+          <GROUP id="{B2BF2B44-93BB-60AF-901C-2FED6CF771B0}" name="Util">
+            <FILE id="AUjc3p" name="MusicalSequencer.h" compile="0" resource="0"
+                  file="UniSampler/Source/Plugin/MusicalSequencer.h"/>
+            <FILE id="KpN9sw" name="StringOps.cpp" compile="1" resource="0" file="UniSampler/Source/Plugin/StringOps.cpp"/>
+            <FILE id="PR6Zp7" name="DSP.cpp" compile="1" resource="0" file="UniSampler/Source/Plugin/DSP.cpp"/>
+            <FILE id="uhgOHT" name="ByteArrayBuffer.h" compile="0" resource="0"
+                  file="UniSampler/Source/Plugin/ByteArrayBuffer.h"/>
+            <FILE id="HaaOko" name="LockFree.h" compile="0" resource="0" file="UniSampler/Source/Plugin/LockFree.h"/>
+            <FILE id="OslSYr" name="Util.cpp" compile="1" resource="0" file="UniSampler/Source/Plugin/Util.cpp"/>
+            <FILE id="kc7SDQ" name="Util.h" compile="0" resource="0" file="UniSampler/Source/Plugin/Util.h"/>
+          </GROUP>
+          <GROUP id="{5181CEDE-51A0-5967-FC35-44FF8EF1696E}" name="Kernels">
+            <FILE id="ZVjhnI" name="DSP.cu" compile="0" resource="1" file="UniSampler/Source/Plugin/Kernels/DSP.cu"/>
+          </GROUP>
+          <GROUP id="{64720F40-2E69-F56C-B951-88F6A9535836}" name="Effects">
+            <FILE id="AACss5" name="Distortion.cpp" compile="1" resource="0" file="UniSampler/Source/Plugin/Effects/Distortion.cpp"/>
+            <FILE id="I2vKQi" name="Distortion.h" compile="0" resource="0" file="UniSampler/Source/Plugin/Effects/Distortion.h"/>
+            <FILE id="p7Bg5k" name="Drive.cpp" compile="1" resource="0" file="UniSampler/Source/Plugin/Effects/Drive.cpp"/>
+            <FILE id="jM10VK" name="Drive.h" compile="0" resource="0" file="UniSampler/Source/Plugin/Effects/Drive.h"/>
+            <FILE id="TcbzvK" name="Effects.cpp" compile="1" resource="0" file="UniSampler/Source/Plugin/Effects/Effects.cpp"/>
+            <FILE id="GRfIXW" name="Effects.h" compile="0" resource="0" file="UniSampler/Source/Plugin/Effects/Effects.h"/>
+            <FILE id="TWyIQI" name="Filter.cpp" compile="1" resource="0" file="UniSampler/Source/Plugin/Effects/Filter.cpp"/>
+            <FILE id="uGEGGl" name="Filter.h" compile="0" resource="0" file="UniSampler/Source/Plugin/Effects/Filter.h"/>
+            <FILE id="s1v1fZ" name="Limiter.cpp" compile="1" resource="0" file="UniSampler/Source/Plugin/Effects/Limiter.cpp"/>
+            <FILE id="ECBGNh" name="Limiter.h" compile="0" resource="0" file="UniSampler/Source/Plugin/Effects/Limiter.h"/>
+            <FILE id="wKcvzX" name="Reverb.cpp" compile="1" resource="0" file="UniSampler/Source/Plugin/Effects/Reverb.cpp"/>
+            <FILE id="UO2AiX" name="Reverb.h" compile="0" resource="0" file="UniSampler/Source/Plugin/Effects/Reverb.h"/>
+          </GROUP>
+          <GROUP id="{7754E293-9266-6D4A-0088-9BFD59DB02CD}" name="Modulation">
+            <FILE id="BIGEqO" name="LFO.cpp" compile="1" resource="0" file="UniSampler/Source/Plugin/Modulation/LFO.cpp"/>
+            <FILE id="t6LlI2" name="LFO.h" compile="0" resource="0" file="UniSampler/Source/Plugin/Modulation/LFO.h"/>
+          </GROUP>
+          <FILE id="MUEWaH" name="UniSampler.cpp" compile="1" resource="0" file="UniSampler/Source/Plugin/UniSampler.cpp"/>
+          <FILE id="IQR2Uv" name="UniSampler.h" compile="0" resource="0" file="UniSampler/Source/Plugin/UniSampler.h"/>
+        </GROUP>
+        <GROUP id="{AC5DF04E-9AA4-5996-D8BF-A8D8DE43C72C}" name="tinyxml2">
+          <FILE id="nVfojU" name="tinyxml2.cpp" compile="1" resource="0" file="UniSampler/Source/tinyxml2/tinyxml2.cpp"/>
+          <FILE id="IybIxV" name="tinyxml2.h" compile="0" resource="0" file="UniSampler/Source/tinyxml2/tinyxml2.h"/>
+        </GROUP>
+      </GROUP>
+      <FILE id="dPziEn" name="PluginProcessor.cpp" compile="1" resource="0"
+            file="Source/PluginProcessor.cpp"/>
+      <FILE id="keKofT" name="PluginProcessor.h" compile="0" resource="0"
+            file="Source/PluginProcessor.h"/>
+      <FILE id="une28n" name="PluginEditor.cpp" compile="1" resource="0"
+            file="Source/PluginEditor.cpp"/>
+      <FILE id="udMSqL" name="PluginEditor.h" compile="0" resource="0" file="Source/PluginEditor.h"/>
+    </GROUP>
+  </MAINGROUP>
+  <EXPORTFORMATS>
+    <VS2015 targetFolder="Builds/VisualStudio2015" vst3Folder="$(SDK)\VST3_SDK"
+            windowsTargetPlatformVersion="8.1" externalLibraries="$(SDK)\libsndfile\lib\$(Platform)\$(Configuration)\libsndfile.lib;&#10;$(SDK)\XIPH\FLAC\lib\$(Platform)\$(Configuration)\libFLAC_static.lib;&#10;$(SDK)\XIPH\ogg\lib\$(Platform)\$(Configuration)\libogg_static.lib;&#10;$(SDK)\XIPH\vorbis\lib\$(Platform)\$(Configuration)\libvorbis_static.lib&#10;$(CUDA_PATH)/lib/$(Platform)/cudart.lib;">
+      <CONFIGURATIONS>
+        <CONFIGURATION name="Debug" winWarningLevel="4" generateManifest="1" winArchitecture="x64"
+                       debugInformationFormat="ProgramDatabase" enablePluginBinaryCopyStep="0"
+                       linkTimeOptimisation="0" isDebug="1" optimisation="1" targetName="ARAResampler"
+                       defines="" libraryPath="" headerPath="" useRuntimeLibDLL="1"/>
+        <CONFIGURATION name="Release" winWarningLevel="4" generateManifest="1" winArchitecture="x64"
+                       debugInformationFormat="ProgramDatabase" enablePluginBinaryCopyStep="0"
+                       linkTimeOptimisation="1" isDebug="0" optimisation="3" targetName="ARAResampler"
+                       defines="" libraryPath="" headerPath="" useRuntimeLibDLL="1"/>
+      </CONFIGURATIONS>
+      <MODULEPATHS>
+        <MODULEPATH id="juce_core" path="../../Downloads/juce-huckleberry-windows/JUCE/modules"/>
+        <MODULEPATH id="juce_events" path="../../Downloads/juce-huckleberry-windows/JUCE/modules"/>
+        <MODULEPATH id="juce_graphics" path="../../Downloads/juce-huckleberry-windows/JUCE/modules"/>
+        <MODULEPATH id="juce_data_structures" path="../../Downloads/juce-huckleberry-windows/JUCE/modules"/>
+        <MODULEPATH id="juce_gui_basics" path="../../Downloads/juce-huckleberry-windows/JUCE/modules"/>
+        <MODULEPATH id="juce_gui_extra" path="../../Downloads/juce-huckleberry-windows/JUCE/modules"/>
+        <MODULEPATH id="juce_cryptography" path="../../Downloads/juce-huckleberry-windows/JUCE/modules"/>
+        <MODULEPATH id="juce_video" path="../../Downloads/juce-huckleberry-windows/JUCE/modules"/>
+        <MODULEPATH id="juce_opengl" path="../../Downloads/juce-huckleberry-windows/JUCE/modules"/>
+        <MODULEPATH id="juce_audio_basics" path="../../Downloads/juce-huckleberry-windows/JUCE/modules"/>
+        <MODULEPATH id="juce_audio_devices" path="../../Downloads/juce-huckleberry-windows/JUCE/modules"/>
+        <MODULEPATH id="juce_audio_formats" path="../../Downloads/juce-huckleberry-windows/JUCE/modules"/>
+        <MODULEPATH id="juce_audio_processors" path="../../Downloads/juce-huckleberry-windows/JUCE/modules"/>
+        <MODULEPATH id="juce_audio_plugin_client" path="../../Downloads/juce-huckleberry-windows/JUCE/modules"/>
+        <MODULEPATH id="juce_audio_utils" path="../../Downloads/juce-huckleberry-windows/JUCE/modules"/>
+      </MODULEPATHS>
+    </VS2015>
+    <LINUX_MAKE targetFolder="Builds/LinuxMakefile" externalLibraries="sndfile;&#10;cudart;"
+                extraLinkerFlags="-L/usr/local/cuda/lib64">
+      <CONFIGURATIONS>
+        <CONFIGURATION name="Debug" isDebug="1" optimisation="1" linkTimeOptimisation="0"
+                       targetName="ARAResampler" defines="_DEBUG"/>
+        <CONFIGURATION name="Release" isDebug="0" optimisation="3" linkTimeOptimisation="1"
+                       targetName="ARAResampler"/>
+      </CONFIGURATIONS>
+      <MODULEPATHS>
+        <MODULEPATH id="juce_core" path="../../Downloads/juce-huckleberry-windows/JUCE/modules"/>
+        <MODULEPATH id="juce_events" path="../../Downloads/juce-huckleberry-windows/JUCE/modules"/>
+        <MODULEPATH id="juce_graphics" path="../../Downloads/juce-huckleberry-windows/JUCE/modules"/>
+        <MODULEPATH id="juce_data_structures" path="../../Downloads/juce-huckleberry-windows/JUCE/modules"/>
+        <MODULEPATH id="juce_gui_basics" path="../../Downloads/juce-huckleberry-windows/JUCE/modules"/>
+        <MODULEPATH id="juce_gui_extra" path="../../Downloads/juce-huckleberry-windows/JUCE/modules"/>
+        <MODULEPATH id="juce_cryptography" path="../../Downloads/juce-huckleberry-windows/JUCE/modules"/>
+        <MODULEPATH id="juce_video" path="../../Downloads/juce-huckleberry-windows/JUCE/modules"/>
+        <MODULEPATH id="juce_opengl" path="../../Downloads/juce-huckleberry-windows/JUCE/modules"/>
+        <MODULEPATH id="juce_audio_basics" path="../../Downloads/juce-huckleberry-windows/JUCE/modules"/>
+        <MODULEPATH id="juce_audio_devices" path="../../Downloads/juce-huckleberry-windows/JUCE/modules"/>
+        <MODULEPATH id="juce_audio_formats" path="../../Downloads/juce-huckleberry-windows/JUCE/modules"/>
+        <MODULEPATH id="juce_audio_processors" path="../../Downloads/juce-huckleberry-windows/JUCE/modules"/>
+        <MODULEPATH id="juce_audio_plugin_client" path="../../Downloads/juce-huckleberry-windows/JUCE/modules"/>
+        <MODULEPATH id="juce_audio_utils" path="../../Downloads/juce-huckleberry-windows/JUCE/modules"/>
+      </MODULEPATHS>
+    </LINUX_MAKE>
+    <CLION targetFolder="Builds/CLion" clionMakefileEnabled="1">
+      <MODULEPATHS>
+        <MODULEPATH id="juce_core" path="../../Downloads/juce-huckleberry-windows/JUCE/modules"/>
+        <MODULEPATH id="juce_events" path="../../Downloads/juce-huckleberry-windows/JUCE/modules"/>
+        <MODULEPATH id="juce_graphics" path="../../Downloads/juce-huckleberry-windows/JUCE/modules"/>
+        <MODULEPATH id="juce_data_structures" path="../../Downloads/juce-huckleberry-windows/JUCE/modules"/>
+        <MODULEPATH id="juce_gui_basics" path="../../Downloads/juce-huckleberry-windows/JUCE/modules"/>
+        <MODULEPATH id="juce_gui_extra" path="../../Downloads/juce-huckleberry-windows/JUCE/modules"/>
+        <MODULEPATH id="juce_cryptography" path="../../Downloads/juce-huckleberry-windows/JUCE/modules"/>
+        <MODULEPATH id="juce_video" path="../../Downloads/juce-huckleberry-windows/JUCE/modules"/>
+        <MODULEPATH id="juce_opengl" path="../../Downloads/juce-huckleberry-windows/JUCE/modules"/>
+        <MODULEPATH id="juce_audio_basics" path="../../Downloads/juce-huckleberry-windows/JUCE/modules"/>
+        <MODULEPATH id="juce_audio_devices" path="../../Downloads/juce-huckleberry-windows/JUCE/modules"/>
+        <MODULEPATH id="juce_audio_formats" path="../../Downloads/juce-huckleberry-windows/JUCE/modules"/>
+        <MODULEPATH id="juce_audio_processors" path="../../Downloads/juce-huckleberry-windows/JUCE/modules"/>
+        <MODULEPATH id="juce_audio_plugin_client" path="../../Downloads/juce-huckleberry-windows/JUCE/modules"/>
+        <MODULEPATH id="juce_audio_utils" path="../../Downloads/juce-huckleberry-windows/JUCE/modules"/>
+      </MODULEPATHS>
+    </CLION>
+  </EXPORTFORMATS>
+  <MODULES>
+    <MODULE id="juce_audio_basics" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_audio_devices" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_audio_formats" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_audio_plugin_client" showAllCode="1" useLocalCopy="0"
+            useGlobalPath="1"/>
+    <MODULE id="juce_audio_processors" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_audio_utils" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_core" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_cryptography" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_data_structures" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_events" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_graphics" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_gui_basics" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_gui_extra" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_opengl" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_video" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+  </MODULES>
+  <JUCEOPTIONS JUCE_QUICKTIME="disabled" JUCE_USE_FLAC="0"/>
+</JUCERPROJECT>
