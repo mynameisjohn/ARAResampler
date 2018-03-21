@@ -15,8 +15,9 @@
   <MAINGROUP id="s9yGl0" name="ARAResampler">
     <GROUP id="{7C456696-34ED-9DCF-2FBB-D57A35221EE8}" name="Source">
       <GROUP id="{AD1E1B44-2819-3848-36D2-961B50FD1D4B}" name="ARAUtils">
-        <FILE id="j9ulT7" name="ARAPlugin.cpp" compile="1" resource="0" file="Source/ARAUtils/ARAPlugin.cpp"/>
-        <FILE id="IvwnW7" name="ARAPlugin.h" compile="0" resource="0" file="Source/ARAUtils/ARAPlugin.h"/>
+        <FILE id="wxw9uP" name="ARAResampler.cpp" compile="1" resource="0"
+              file="Source/ARAUtils/ARAResampler.cpp"/>
+        <FILE id="ELh2fD" name="ARAResampler.h" compile="0" resource="0" file="Source/ARAUtils/ARAResampler.h"/>
         <FILE id="hMzYpp" name="ARAUtil.h" compile="0" resource="0" file="Source/ARAUtils/ARAUtil.h"/>
         <FILE id="SXtL7c" name="VST3ARAPlugin.cpp" compile="1" resource="0"
               file="Source/ARAUtils/VST3ARAPlugin.cpp"/>
