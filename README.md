@@ -1,6 +1,14 @@
 # ARAResampler
 A JUCE plugin that uses Melodyne to create a multisample instrument from a single sample. 
 
+When pitching samples in a multisampler we walk the source samples at a rate indicative of how much we'd like to change 
+the pitch; for example to hear a sample an octave higher than source we must play it twice as fast. However that changes
+the duration of the sample, which is often an inevitable drawback of sampling synths. 
+
+However, we can use Melodyne to compensate for this change in duration; in our example where we pitched a sample up an octave, 
+all we have to do is use melodyne to stretch the sample to double its duration. That way when we play the pitched sample its
+duration matches the source. 
+
 The actual sampler is implemented using the UniSampler subrepo.
 
 ## Build Instructions
