@@ -226,31 +226,37 @@ bool ARAResampler::CreateSamples( std::string strRootSample, ICommandListener * 
 	// start editing the document so we can add the sample as an audio source
 	m_pDocControllerInterface->beginEditing( m_pDocControllerRef );
 
+	// add a musical context to describe our timeline
+	ARAMusicalContextProperties musicalContextProperties = { sizeof( musicalContextProperties ) };
+	ARAMusicalContextRef musicalContextRef = m_pDocControllerInterface->createMusicalContext( m_pDocControllerRef, kHostMusicalContextHostRef, &musicalContextProperties );
+
 	// Create audio source properties for our root sample
 	ARAAudioSourceProperties audioSourceProperties = { sizeof( audioSourceProperties ), "Root Sample", "rootSamplePersistentID",
 		m_pCurrentRootSample->size(), (double) m_pCurrentRootSample->iSampleRate, fileInfo.channels, kARAFalse };
+
+	// Object Hierarchy
+	// Document { AudioSources { Audio Modifications { Playback Regions } } } }
 
 	// Create audio source and provide the root sample pointer as the host reference (we'll use it when the plugin reads the audio data)
 	ARAAudioSourceRef audioSourceRef = m_pDocControllerInterface->createAudioSource( m_pDocControllerRef, this, &audioSourceProperties );
 
 	// Create the audio modification so we can do the time stretch
 	ARAAudioModificationProperties audioModificationProperties = { sizeof( ARAAudioModificationProperties ),
-		"Test audio modification", "audioModificationTestPersistentID" };
+		"Stretched Audio Source", "audioModificationTestPersistentID" };
 	ARAAudioModificationRef audioModificationRef = m_pDocControllerInterface->createAudioModification( m_pDocControllerRef, audioSourceRef, kHostAudioModificationHostRef, &audioModificationProperties );
 
-	// add a musical context to describe our timeline
-	ARAMusicalContextProperties musicalContextProperties = { sizeof( musicalContextProperties ) };
-	ARAMusicalContextRef musicalContextRef = m_pDocControllerInterface->createMusicalContext( m_pDocControllerRef, kHostMusicalContextHostRef, &musicalContextProperties );
-
-	// Set up playback region for our sample
+	// Create a playback region within the audio modification and stretch it
+	// Note that the playback region represents the modified audio, not the audio modification
+	// To perform the stretch we'll modify the playback region properties
 	double dRootDurInSeconds = (double) m_pCurrentRootSample->size() / (double) m_pCurrentRootSample->iSampleRate;
-	ARAPlaybackRegionProperties playbackRegionProperties = { sizeof( playbackRegionProperties ), kARAPlaybackTransformationNoChanges,
-		0, dRootDurInSeconds, 0, dRootDurInSeconds, musicalContextRef };
+	ARAPlaybackRegionProperties playbackRegionProperties = { 
+		sizeof( playbackRegionProperties ), 
+		kARAPlaybackTransformationTimestretch,
+		0, dRootDurInSeconds, 
+		0, dRootDurInSeconds, 
+		musicalContextRef };
 
-	// All we'll be doing is time stretching
-	playbackRegionProperties.transformationFlags |= kARAPlaybackTransformationTimestretch;
-
-	// add a playback region to render modification in our musical context
+	// Construct playback region from modification using stretched properties
 	ARAPlaybackRegionRef playbackRegionRef = m_pDocControllerInterface->createPlaybackRegion( m_pDocControllerRef, audioModificationRef, kHostAudioModificationHostRef, &playbackRegionProperties );
 	m_pPluginExtensionInterface->setPlaybackRegion( m_pPluginRef, playbackRegionRef );
 
